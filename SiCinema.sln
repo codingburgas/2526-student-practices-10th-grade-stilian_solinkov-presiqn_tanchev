@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37012.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SiCinema", "build/SiCinema.vcxproj", "{5A4CEA38-D85B-4BBB-8030-543159758A8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Debug|x64.ActiveCfg = Debug|x64
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Debug|x64.Build.0 = Debug|x64
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Debug|x86.ActiveCfg = Debug|Win32
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Debug|x86.Build.0 = Debug|Win32
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Release|x64.ActiveCfg = Release|x64
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Release|x64.Build.0 = Release|x64
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Release|x86.ActiveCfg = Release|Win32
+		{5A4CEA38-D85B-4BBB-8030-543159758A8D}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {01093833-57F8-437A-A201-89F0A4B92AF8}
+	EndGlobalSection
+EndGlobal
