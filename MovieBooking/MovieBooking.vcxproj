@@ -18,11 +18,37 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Booking.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Movie.cpp" />
+    <ClCompile Include="src\Seat.cpp" />
+    <ClCompile Include="src\Show.cpp" />
+    <ClCompile Include="src\UI.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Booking.h" />
+    <ClInclude Include="include\Movie.h" />
+    <ClInclude Include="include\Seat.h" />
+    <ClInclude Include="include\Show.h" />
+    <ClInclude Include="include\UI.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\Avatar 2.jpg" />
+    <Image Include="assets\Batman.jpg" />
+    <Image Include="assets\Dune.jpg" />
+    <Image Include="assets\Inception.jpg" />
+    <Image Include="assets\Interstellar.jpg" />
+    <Image Include="assets\Joker.jpg" />
+    <Image Include="assets\Matrix.jpg" />
+    <Image Include="assets\Oppenheimer.jpg" />
+    <Image Include="assets\Titanic.png" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5a4cea38-d85b-4bbb-8030-543159758a8d}</ProjectGuid>
-    <RootNamespace>SiCinema</RootNamespace>
+    <ProjectGuid>{221c00a6-a66a-43cd-a7f7-201043327f7e}</ProjectGuid>
+    <RootNamespace>MovieBooking</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -122,9 +148,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="SiCinema.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
