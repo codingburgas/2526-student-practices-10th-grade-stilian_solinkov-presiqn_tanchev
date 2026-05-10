@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <string>
-#include "raylib.h"
+#include "../external/raylib-5.5_win64_msvc16/include/raylib.h"
 
 class Movie {
 public:

@@ -15,7 +15,7 @@ bool Seat::IsClicked(Vector2 mouse) {
 void Seat::Draw() {
     Color c;
 
-    if (state == AVAILABLE) c = GREEN;
+    if (state == AVAILABLE) c = DARKBLUE;
     else if (state == SELECTED) c = YELLOW;
     else c = RED;
 

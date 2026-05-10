@@ -1,5 +1,5 @@
 #include "../include/UI.h"
-#include "raylib.h"
+#include "../external/raylib-5.5_win64_msvc16/include/raylib.h"
 
 void UI::Init(Show* s) {
     show = s;

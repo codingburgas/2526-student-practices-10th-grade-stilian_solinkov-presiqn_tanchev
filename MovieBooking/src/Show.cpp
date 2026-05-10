@@ -12,7 +12,7 @@ void Show::InitSeats() {
 
     int id = 0;
     int startX = 120;
-    int startY = 180;
+    int startY = 260;
     int size = 40;
     int gap = 10;
 
