@@ -25,8 +25,8 @@ std::vector<Movie> movies;
 
 void InitMovies() {
 
-    movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "../assets/images/interstellar.png"));
-    movies.push_back(Movie("Avatar 2", "EN", "Action", 15, "../assets/images/avatar.png"));
+    movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
+    movies.push_back(Movie("Avatar 2", "EN", "Action", 15, "assets/images/avatar.png"));
     movies.push_back(Movie("Oppenheimer", "EN", "Drama", 18, "assets/images/oppenheimer.png"));
     movies.push_back(Movie("Batman", "EN", "Action", 10, "assets/images/batman.png"));
     movies.push_back(Movie("Inception", "EN", "Sci-Fi", 14, "assets/images/inception.png"));
@@ -67,17 +67,17 @@ int main() {
 
             Vector2 mouse = GetMousePosition();
 
-            // MENU BUTTON
+            // Menu button
             bool menuHover = CheckCollisionPointRec(mouse, menuBtn);
             DrawRectangleRec(menuBtn, menuHover ? DARKBLUE : BLUE);
             DrawText("MENU", 455, 318, 25, WHITE);
 
-            // RECENT BOOKINGS BUTTON
+            // Recent bookings button
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
             DrawRectangleRec(recentBtn, recentHover ? DARKBLUE : BLUE);
             DrawText("RECENT BOOKINGS", 390, 408, 25, WHITE);
 
-            // EXIT BUTTON
+            // Exit button
             bool exitHover = CheckCollisionPointRec(mouse, exitBtn);
             DrawRectangleRec(exitBtn, exitHover ? DARKBLUE : BLUE);
             DrawText("EXIT", 465, 498, 25, WHITE);

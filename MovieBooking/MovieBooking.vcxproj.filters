@@ -52,31 +52,31 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\Matrix.jpg">
+    <Image Include="assets\images\Titanic.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Dune.jpg">
+    <Image Include="assets\images\Oppenheimer.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Titanic.png">
+    <Image Include="assets\images\Batman.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Joker.jpg">
+    <Image Include="assets\images\Dune.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Inception.jpg">
+    <Image Include="assets\images\Inception.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Batman.jpg">
+    <Image Include="assets\images\Interstellar.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Oppenheimer.jpg">
+    <Image Include="assets\images\Joker.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Avatar 2.jpg">
+    <Image Include="assets\images\Matrix.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\Interstellar.jpg">
+    <Image Include="assets\images\Avatar.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

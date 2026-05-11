@@ -34,15 +34,15 @@
     <ClInclude Include="include\UI.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\Avatar 2.jpg" />
-    <Image Include="assets\Batman.jpg" />
-    <Image Include="assets\Dune.jpg" />
-    <Image Include="assets\Inception.jpg" />
-    <Image Include="assets\Interstellar.jpg" />
-    <Image Include="assets\Joker.jpg" />
-    <Image Include="assets\Matrix.jpg" />
-    <Image Include="assets\Oppenheimer.jpg" />
-    <Image Include="assets\Titanic.png" />
+    <Image Include="assets\images\Avatar.png" />
+    <Image Include="assets\images\Batman.png" />
+    <Image Include="assets\images\Dune.png" />
+    <Image Include="assets\images\Inception.png" />
+    <Image Include="assets\images\Interstellar.png" />
+    <Image Include="assets\images\Joker.png" />
+    <Image Include="assets\images\Matrix.png" />
+    <Image Include="assets\images\Oppenheimer.png" />
+    <Image Include="assets\images\Titanic.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
