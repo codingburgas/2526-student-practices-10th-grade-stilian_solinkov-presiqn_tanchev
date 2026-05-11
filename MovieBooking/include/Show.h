@@ -18,4 +18,5 @@ public:
     int GetTotalPrice();
     void ConfirmBooking();
     void SaveBookedSeats();
+    void LoadBookedSeats();
 };

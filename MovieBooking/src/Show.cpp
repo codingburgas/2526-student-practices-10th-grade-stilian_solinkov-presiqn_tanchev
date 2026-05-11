@@ -1,7 +1,7 @@
 ﻿#include "../include/Show.h"
 #include <fstream>
+#include <sstream>
 
-Show::Show() {}
 
 Show::Show(Movie* m) {
     movie = m;
@@ -69,15 +69,57 @@ void Show::ConfirmBooking() {
 }
 
 void Show::SaveBookedSeats() {
-    std::ofstream file("data/bookings.txt", std::ios::app);
+    std::ofstream file("assets/bookings.txt", std::ios::app);
 
-    file << "Movie: " << movie->title << " | Seats: ";
+    file << movie->title << ":";
 
-    for (auto& s : seats)
-        if (s.state == BOOKED)
-            file << s.id << " ";
+    bool first = true;
+
+    for (auto& s : seats) {
+        if (s.state == BOOKED) {
+            if (!first) file << ",";
+            file << s.id;
+            first = false;
+        }
+    }
 
     file << "\n";
+
+    file.close();
+}
+
+void Show::LoadBookedSeats() {
+
+    std::ifstream file("assets/bookings.txt");
+    std::string line;
+
+    while (getline(file, line)) {
+
+        size_t sep = line.find(":");
+        if (sep == std::string::npos) continue;
+
+        std::string movieName = line.substr(0, sep);
+
+        if (movieName != movie->title)
+            continue;
+
+        std::string seatData = line.substr(sep + 1);
+
+        std::stringstream ss(seatData);
+        std::string idStr;
+
+        while (getline(ss, idStr, ',')) {
+
+            if (idStr.empty()) continue;
+
+            int id = std::stoi(idStr);
+
+            for (auto& s : seats) {
+                if (s.id == id)
+                    s.state = BOOKED;
+            }
+        }
+    }
 
     file.close();
 }

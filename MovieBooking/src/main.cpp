@@ -4,6 +4,20 @@
 #include <fstream>
 #include <vector>
 
+void SaveBooking(const std::string& movieTitle, int price) {
+    std::ofstream file("assets/bookings.txt", std::ios::app);
+
+    if (!file.is_open()) {
+        TraceLog(LOG_ERROR, "FAILED TO OPEN bookings.txt");
+        return;
+    }
+
+    file << "Movie: " << movieTitle
+        << " | Paid: " << price << "$\n";
+
+    file.close();
+}
+
 enum AppState {
     HOME,
     MAIN_MENU,
@@ -177,6 +191,9 @@ int main() {
                     selectedMovie = i;
                     currentShow = new Show(&movies[i]);
                     currentShow->InitSeats();
+
+                    currentShow->LoadBookedSeats();
+
                     state = BOOKING;
                 }
             }
@@ -264,6 +281,8 @@ int main() {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
                 if (CheckCollisionPointRec(mouse, backBtn)) {
+
+                    SaveBooking(movies[selectedMovie].title, finalPrice);
 
                     currentShow->ConfirmBooking();
                     currentShow->SaveBookedSeats();
