@@ -197,6 +197,11 @@ int main() {
             DrawRectangleRec(backBtn, GRAY);
             DrawText("BACK", 300, 175, 20, BLACK);
 
+            if (currentShow != nullptr) {
+                currentShow->Update();
+                currentShow->Draw();
+            }
+
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
                 if (CheckCollisionPointRec(mouse, payBtn)) {
@@ -215,9 +220,19 @@ int main() {
                 }
             }
 
+            DrawTexturePro(
+                movies[selectedMovie].poster,
+                { 0, 0,
+                  (float)movies[selectedMovie].poster.width,
+                  (float)movies[selectedMovie].poster.height },
 
-            currentShow->Update();
-            currentShow->Draw();
+                { 550, 60, 400, 600 },
+
+                { 0, 0 },
+                0,
+                WHITE
+            );
+
         }
 
         else if (state == PAYMENT) {
