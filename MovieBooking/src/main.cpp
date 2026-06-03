@@ -20,6 +20,7 @@ void SaveBooking(const std::string& movieTitle, int price) {
 }
 
 enum AppState {
+    LOGIN,
     HOME,
     MAIN_MENU,
     BOOKING,
@@ -28,7 +29,7 @@ enum AppState {
     RECENT_BOOKINGS
 };
 
-AppState state = HOME;
+AppState state = LOGIN;
 
 int selectedMovie = -1;
 Show* currentShow = nullptr;
@@ -37,6 +38,13 @@ int finalPrice = 0;
 float paymentTimer = 0;
 
 std::vector<Movie> movies;
+
+// Login UI state
+std::string loginUsername;
+std::string loginPassword;
+std::string loginMessage;
+bool typingUsername = false;
+bool typingPassword = false;
 
 void InitMovies() {
 
@@ -65,10 +73,82 @@ int main() {
         BeginDrawing();
         ClearBackground(Theme::Background());
 
-        if (state == HOME) {
+        if (state == LOGIN) {
 
-            // Background
-            ClearBackground(RAYWHITE);
+            // Draw login screen
+            DrawText("Login", 420, 120, 48, Theme::Primary());
+
+            Rectangle userRect = { 300, 220, 400, 40 };
+            Rectangle passRect = { 300, 280, 400, 40 };
+            Rectangle loginBtn = { 430, 340, 140, 40 };
+
+            bool userHover = CheckCollisionPointRec(mouse, userRect);
+            bool passHover = CheckCollisionPointRec(mouse, passRect);
+            bool loginHover = CheckCollisionPointRec(mouse, loginBtn);
+
+            DrawRectangleRec(userRect, typingUsername ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(userRect, 2, Theme::Outline());
+            DrawText("Username:", 310, 226, 18, Theme::Text());
+            DrawText(loginUsername.c_str(), 420, 226, 18, Theme::Text());
+
+            DrawRectangleRec(passRect, typingPassword ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(passRect, 2, Theme::Outline());
+            DrawText("Password:", 310, 286, 18, Theme::Text());
+            std::string masked(loginPassword.size(), '*');
+            DrawText(masked.c_str(), 420, 286, 18, Theme::Text());
+
+            DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Primary());
+            DrawText("LOGIN", 475, 351, 20, Theme::ButtonText());
+
+            if (!loginMessage.empty()) {
+                DrawText(loginMessage.c_str(), 360, 400, 18, Theme::Text());
+            }
+
+            // Input handling
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (CheckCollisionPointRec(mouse, userRect)) {
+                    typingUsername = true; typingPassword = false;
+                } else if (CheckCollisionPointRec(mouse, passRect)) {
+                    typingPassword = true; typingUsername = false;
+                } else if (CheckCollisionPointRec(mouse, loginBtn)) {
+                    // attempt login
+                    if (loginUsername.empty() || loginPassword.empty()) {
+                        loginMessage = "Please enter username and password";
+                    } else {
+                        loginMessage = "Login successful";
+                        typingUsername = typingPassword = false;
+                        state = HOME;
+                    }
+                } else {
+                    typingUsername = typingPassword = false;
+                }
+            }
+
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (key >= 32 && key <= 125) {
+                    if (typingUsername && loginUsername.size() < 64) loginUsername.push_back((char)key);
+                    else if (typingPassword && loginPassword.size() < 64) loginPassword.push_back((char)key);
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                if (typingUsername && !loginUsername.empty()) loginUsername.pop_back();
+                if (typingPassword && !loginPassword.empty()) loginPassword.pop_back();
+            }
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                if (loginUsername.empty() || loginPassword.empty()) {
+                    loginMessage = "Please enter username and password";
+                } else {
+                    loginMessage = "Login successful";
+                    typingUsername = typingPassword = false;
+                    state = HOME;
+                }
+            }
+
+        } else if (state == HOME) {
 
             // Title
             DrawText("SiCinema", 340, 120, 60, Theme::Primary());
