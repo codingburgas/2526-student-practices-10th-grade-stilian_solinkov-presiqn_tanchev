@@ -1,6 +1,7 @@
 ﻿#include "../external/raylib-5.5_win64_msvc16/include/raylib.h"
 #include "../include/Movie.h"
 #include "../include/Show.h"
+#include "../include/Theme.h"
 #include <fstream>
 #include <vector>
 
@@ -62,7 +63,7 @@ int main() {
         Vector2 mouse = GetMousePosition();
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(Theme::Background());
 
         if (state == HOME) {
 
@@ -70,9 +71,9 @@ int main() {
             ClearBackground(RAYWHITE);
 
             // Title
-            DrawText("SiCinema", 340, 120, 60, DARKBLUE);
+            DrawText("SiCinema", 340, 120, 60, Theme::Primary());
 
-            DrawText("Movie Ticket Booking System", 300, 190, 25, LIGHTGRAY);
+            DrawText("Movie Ticket Booking System", 300, 190, 25, Theme::SecondaryText());
 
             // Buttons
             Rectangle menuBtn = { 350, 300, 300, 60 };
@@ -83,18 +84,18 @@ int main() {
 
             // Menu button
             bool menuHover = CheckCollisionPointRec(mouse, menuBtn);
-            DrawRectangleRec(menuBtn, menuHover ? DARKBLUE : BLUE);
-            DrawText("MENU", 455, 318, 25, WHITE);
+            DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("MENU", 455, 318, 25, Theme::ButtonText());
 
             // Recent bookings button
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
-            DrawRectangleRec(recentBtn, recentHover ? DARKBLUE : BLUE);
-            DrawText("RECENT BOOKINGS", 390, 408, 25, WHITE);
+            DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("RECENT BOOKINGS", 390, 408, 25, Theme::ButtonText());
 
             // Exit button
             bool exitHover = CheckCollisionPointRec(mouse, exitBtn);
-            DrawRectangleRec(exitBtn, exitHover ? DARKBLUE : BLUE);
-            DrawText("EXIT", 465, 498, 25, WHITE);
+            DrawRectangleRec(exitBtn, exitHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("EXIT", 465, 498, 25, Theme::ButtonText());
 
             // Mouse Input
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -116,7 +117,7 @@ int main() {
 
         else if (state == RECENT_BOOKINGS) {
 
-            DrawText("Recent Bookings", 320, 40, 40, DARKBLUE);
+            DrawText("Recent Bookings", 320, 40, 40, Theme::Primary());
 
             std::ifstream file("data/bookings.txt");
 
@@ -124,7 +125,7 @@ int main() {
             int y = 140;
 
             while (getline(file, line)) {
-                DrawText(line.c_str(), 80, y, 22, BLACK);
+                DrawText(line.c_str(), 80, y, 22, Theme::Text());
                 y += 40;
             }
 
@@ -132,8 +133,8 @@ int main() {
 
             Rectangle backBtn = { 350, 600, 250, 60 };
 
-            DrawRectangleRec(backBtn, GRAY);
-            DrawText("BACK", 450, 620, 25, BLACK);
+            DrawRectangleRec(backBtn, Theme::Button());
+            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
@@ -145,12 +146,12 @@ int main() {
 
         else if (state == MAIN_MENU) {
 
-            DrawText("SiCinema", 420, 10, 40, DARKBLUE);
+            DrawText("SiCinema", 420, 10, 40, Theme::Primary());
 
             Rectangle backBtn = { 350, 600, 250, 60 };
 
-            DrawRectangleRec(backBtn, GRAY);
-            DrawText("BACK", 450, 620, 25, BLACK);
+            DrawRectangleRec(backBtn, Theme::Button());
+            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
@@ -172,8 +173,8 @@ int main() {
 
                 bool hover = CheckCollisionPointRec(mouse, card);
 
-                DrawRectangleRec(card, hover ? DARKBLUE : BLUE);
-                DrawRectangleLinesEx(card, 2, BLACK);
+                DrawRectangleRec(card, hover ? Theme::ButtonHover() : Theme::Button());
+                DrawRectangleLinesEx(card, 2, Theme::Outline());
 
                 DrawTexturePro(
                     movies[i].poster,
@@ -184,8 +185,8 @@ int main() {
                     WHITE
                 );
 
-                DrawText(movies[i].title.c_str(), x + 100, y + 10, 20, WHITE);
-                DrawText(TextFormat("Price: %d$", movies[i].price), x + 100, y + 50, 20, WHITE);
+                DrawText(movies[i].title.c_str(), x + 100, y + 10, 20, Theme::ButtonText());
+                DrawText(TextFormat("Price: %d$", movies[i].price), x + 100, y + 50, 20, Theme::ButtonText());
 
                 if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     selectedMovie = i;
@@ -201,18 +202,18 @@ int main() {
 
         else if (state == BOOKING) {
 
-            DrawText(movies[selectedMovie].title.c_str(), 20, 20, 30, DARKBLUE);
-            DrawText(TextFormat("Price: %d$", movies[selectedMovie].price), 20, 60, 25, DARKGREEN);
-            DrawText(TextFormat("Total: %d$", currentShow->GetTotalPrice()), 20, 100, 25, MAROON);
+            DrawText(movies[selectedMovie].title.c_str(), 20, 20, 30, Theme::Primary());
+            DrawText(TextFormat("Price: %d$", movies[selectedMovie].price), 20, 60, 25, Theme::Success());
+            DrawText(TextFormat("Total: %d$", currentShow->GetTotalPrice()), 20, 100, 25, Theme::Text());
 
             Rectangle payBtn = { 20,160,200,50 };
             Rectangle backBtn = { 240,160,200,50 };
 
-            DrawRectangleRec(payBtn, DARKBLUE);
-            DrawText("PAY", 90, 175, 20, WHITE);
+            DrawRectangleRec(payBtn, Theme::Primary());
+            DrawText("PAY", 90, 175, 20, Theme::ButtonText());
 
-            DrawRectangleRec(backBtn, GRAY);
-            DrawText("BACK", 300, 175, 20, BLACK);
+            DrawRectangleRec(backBtn, Theme::Button());
+            DrawText("BACK", 300, 175, 20, Theme::ButtonText());
 
             if (currentShow != nullptr) {
                 currentShow->Update();
@@ -254,15 +255,15 @@ int main() {
 
         else if (state == PAYMENT) {
 
-            DrawText("PROCESSING PAYMENT...", 300, 200, 30, DARKBLUE);
-            DrawText(TextFormat("Amount: %d$", finalPrice), 350, 260, 25, BLACK);
+            DrawText("PROCESSING PAYMENT...", 300, 200, 30, Theme::Primary());
+            DrawText(TextFormat("Amount: %d$", finalPrice), 350, 260, 25, Theme::Text());
 
-            DrawRectangle(300, 320, 400, 40, GRAY);
+            DrawRectangle(300, 320, 400, 40, Theme::Button());
 
             paymentTimer += GetFrameTime() * 50;
             if (paymentTimer > 100) paymentTimer = 100;
 
-            DrawRectangle(300, 320, (int)paymentTimer * 4, 40, GREEN);
+            DrawRectangle(300, 320, (int)paymentTimer * 4, 40, Theme::Progress());
 
             if (paymentTimer >= 100)
                 state = CONFIRMATION;
@@ -270,13 +271,13 @@ int main() {
 
         else if (state == CONFIRMATION) {
 
-            DrawText("PAYMENT SUCCESSFUL!", 280, 200, 40, GREEN);
-            DrawText(TextFormat("Paid: %d$", finalPrice), 360, 270, 25, DARKBLUE);
+            DrawText("PAYMENT SUCCESSFUL!", 280, 200, 40, Theme::Success());
+            DrawText(TextFormat("Paid: %d$", finalPrice), 360, 270, 25, Theme::Primary());
 
             Rectangle backBtn = { 350,400,250,60 };
 
-            DrawRectangleRec(backBtn, DARKBLUE);
-            DrawText("BACK TO MENU", 390, 420, 20, WHITE);
+            DrawRectangleRec(backBtn, Theme::Primary());
+            DrawText("BACK TO MENU", 390, 420, 20, Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
@@ -294,6 +295,9 @@ int main() {
                 }
             }
         }
+
+        // Theme toggle: press T to toggle theme
+        if (IsKeyPressed(KEY_T)) Theme::Toggle();
 
         EndDrawing();
     }

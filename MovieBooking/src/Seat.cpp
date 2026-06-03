@@ -1,4 +1,5 @@
 #include "../include/Seat.h"
+#include "../include/Theme.h"
 
 Seat::Seat() {}
 
@@ -15,10 +16,10 @@ bool Seat::IsClicked(Vector2 mouse) {
 void Seat::Draw() {
     Color c;
 
-    if (state == AVAILABLE) c = DARKBLUE;
-    else if (state == SELECTED) c = YELLOW;
-    else c = RED;
+    if (state == AVAILABLE) c = Theme::SeatAvailable();
+    else if (state == SELECTED) c = Theme::SeatSelected();
+    else c = Theme::SeatBooked();
 
     DrawRectangleRec(rect, c);
-    DrawRectangleLinesEx(rect, 2, BLACK);
+    DrawRectangleLinesEx(rect, 2, Theme::Outline());
 }
