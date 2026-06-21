@@ -2,7 +2,9 @@
 #include "../include/Movie.h"
 #include "../include/Show.h"
 #include "../include/Theme.h"
+#include "../include/Booking.h"
 #include <fstream>
+#include <string>
 #include <vector>
 
 void SaveBooking(const std::string& movieTitle, int price) {
@@ -195,34 +197,58 @@ int main() {
             }
         }
 
-        else if (state == RECENT_BOOKINGS) {
+        else if (state == RECENT_BOOKINGS)
+        {
+            DrawText("Recent Bookings", 330, 30, 40, DARKBLUE);
 
-            DrawText("Recent Bookings", 320, 40, 40, Theme::Primary());
+            std::ifstream file("assets/bookings.txt");
 
-            std::ifstream file("data/bookings.txt");
+            int y = 120;
 
-            std::string line;
-            int y = 140;
+            std::string bookingId;
+            std::string movie;
+            std::string seats;
+            std::string total;
+            std::string separator;
 
-            while (getline(file, line)) {
-                DrawText(line.c_str(), 80, y, 22, Theme::Text());
-                y += 40;
+            while (
+                getline(file, bookingId) &&
+                getline(file, movie) &&
+                getline(file, seats) &&
+                getline(file, total) &&
+                getline(file, separator))
+            {
+                Rectangle card = { 80, (float)y, 800, 120 };
+
+                DrawRectangleRounded(card, 0.15f, 10, LIGHTGRAY);
+                DrawRectangleRoundedLines(card, 0.15f, 10, DARKGRAY);
+
+                DrawText(movie.c_str(), 110, y + 15, 24, DARKBLUE);
+
+                DrawText(bookingId.c_str(), 110, y + 50, 18, BLACK);
+
+                DrawText(seats.c_str(), 110, y + 75, 18, BLACK);
+
+                DrawText(total.c_str(), 550, y + 50, 20, DARKGREEN);
+
+                y += 140;
             }
 
             file.close();
 
-            Rectangle backBtn = { 350, 600, 250, 60 };
+            Rectangle backBtn = { 400, 600, 200, 50 };
 
-            DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
+            DrawRectangleRec(backBtn, GRAY);
+            DrawText("BACK", 470, 615, 20, WHITE);
 
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-
-                if (CheckCollisionPointRec(GetMousePosition(), backBtn)) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (CheckCollisionPointRec(GetMousePosition(), backBtn))
+                {
                     state = HOME;
                 }
             }
-        }
+}
 
         else if (state == MAIN_MENU) {
 
@@ -363,7 +389,21 @@ int main() {
 
                 if (CheckCollisionPointRec(mouse, backBtn)) {
 
-                    SaveBooking(movies[selectedMovie].title, finalPrice);
+                    Booking booking;
+
+                    booking.bookingId = rand() % 10000;
+                    booking.movieTitle = movies[selectedMovie].title;
+                    booking.totalPrice = finalPrice;
+
+                    for (auto& s : currentShow->seats)
+                    {
+                        if (s.state == SELECTED)
+                        {
+                            booking.seatIds.push_back(s.id);
+                        }
+                    }
+
+                    booking.SaveToFile();
 
                     currentShow->ConfirmBooking();
                     currentShow->SaveBookedSeats();

@@ -1,16 +1,4 @@
-﻿  Booking.cpp
-  main.cpp
-  Movie.cpp
-  Seat.cpp
-  Show.cpp
-D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\Show.cpp(23,24): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\Show.cpp(23,24): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\Show.cpp(24,24): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\Show.cpp(24,24): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-  UI.cpp
-  Generating Code...
-raylib.lib(rcore.obj) : error LNK2005: CloseWindow already defined in user32.lib(USER32.dll)
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-raylib.lib(rcore.obj) : error LNK2019: unresolved external symbol __imp_timeBeginPeriod referenced in function InitPlatform
-raylib.lib(rcore.obj) : error LNK2019: unresolved external symbol __imp_timeEndPeriod referenced in function ClosePlatform
-D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe : fatal error LNK1120: 2 unresolved externals
+﻿  main.cpp
+  MovieBooking.vcxproj -> C:\Users\Pres\Downloads\ppspsp\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

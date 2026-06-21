@@ -24,6 +24,7 @@
     <ClCompile Include="src\Movie.cpp" />
     <ClCompile Include="src\Seat.cpp" />
     <ClCompile Include="src\Show.cpp" />
+    <ClCompile Include="src\Theme.cpp" />
     <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ClInclude Include="include\Movie.h" />
     <ClInclude Include="include\Seat.h" />
     <ClInclude Include="include\Show.h" />
+    <ClInclude Include="include\Theme.h" />
     <ClInclude Include="include\UI.h" />
   </ItemGroup>
   <ItemGroup>
@@ -128,14 +130,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Aide da zavursha po prg\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);C:\Users\stsol\Downloads\raylib-6.0_win64_msvc16\lib\raylib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>raylib.lib;raylib.dll</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
