@@ -25,6 +25,7 @@ enum AppState {
     LOGIN,
     HOME,
     MAIN_MENU,
+    CART,
     BOOKING,
     PAYMENT,
     CONFIRMATION,
@@ -33,6 +34,8 @@ enum AppState {
 
 AppState state = HOME;
 bool loggedIn = false;
+std::vector<Booking> cart;
+std::string cartMessage;
 
 int selectedMovie = -1;
 Show* currentShow = nullptr;
@@ -172,21 +175,17 @@ int main() {
             DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
             DrawText("MENU", 455, 318, 25, Theme::ButtonText());
 
-            // Recent bookings (Account) button - disabled when not logged in
+            // Cart button (always accessible)
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
-            if (loggedIn) {
-                DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
-                DrawText("ACCOUNT", 435, 408, 25, Theme::ButtonText());
-            } else {
-                DrawRectangleRec(recentBtn, Theme::Panel());
-                DrawText("ACCOUNT", 435, 408, 25, Theme::SecondaryText());
-            }
+            DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("CART", 435, 408, 25, Theme::ButtonText());
 
-            // Login button next to theme button
+            // Login / Account / Logout button next to theme button
             Rectangle loginBtn = { 650, 20, 160, 40 };
             bool loginHover = CheckCollisionPointRec(mouse, loginBtn);
             DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("Login", 688, 30, 18, Theme::ButtonText());
+            const char* topLabel = (!loggedIn) ? "Login" : (state == ACCOUNT ? "Logout" : "Account");
+            DrawText(topLabel, 688, 30, 18, Theme::ButtonText());
 
             // Theme button
             bool themeHover = CheckCollisionPointRec(mouse, themeBtn);
@@ -206,11 +205,21 @@ int main() {
                 }
 
                 if (CheckCollisionPointRec(mouse, recentBtn)) {
-                    if (loggedIn) state = ACCOUNT;
+                    state = CART;
                 }
 
                 if (CheckCollisionPointRec(mouse, loginBtn)) {
-                    state = LOGIN;
+                    if (!loggedIn) state = LOGIN;
+                    else {
+                        if (state == ACCOUNT) {
+                            // perform logout
+                            loggedIn = false;
+                            loginUsername.clear();
+                            state = HOME;
+                        } else {
+                            state = ACCOUNT;
+                        }
+                    }
                 }
 
                 if (CheckCollisionPointRec(mouse, themeBtn)) {
@@ -266,6 +275,14 @@ int main() {
 
             file.close();
 
+            // Logout button (visible when logged in)
+            Rectangle logoutBtn = { 820, 20, 160, 40 };
+            bool logoutHover = CheckCollisionPointRec(mouse, logoutBtn);
+            if (loggedIn) {
+                DrawRectangleRec(logoutBtn, logoutHover ? Theme::ButtonHover() : Theme::Button());
+                DrawText("Logout", 860, 30, 18, Theme::ButtonText());
+            }
+
             Rectangle backBtn = { 400, 600, 200, 50 };
 
             DrawRectangleRec(backBtn, GRAY);
@@ -275,6 +292,12 @@ int main() {
             {
                 if (CheckCollisionPointRec(GetMousePosition(), backBtn))
                 {
+                    state = HOME;
+                }
+
+                if (loggedIn && CheckCollisionPointRec(GetMousePosition(), logoutBtn)) {
+                    loggedIn = false;
+                    loginUsername.clear();
                     state = HOME;
                 }
             }
@@ -346,7 +369,7 @@ int main() {
             Rectangle backBtn = { 240,160,200,50 };
 
             DrawRectangleRec(payBtn, Theme::Primary());
-            DrawText("PAY", 90, 175, 20, Theme::ButtonText());
+            DrawText("ADD TO CART", 60, 175, 20, Theme::ButtonText());
 
             DrawRectangleRec(backBtn, Theme::Button());
             DrawText("BACK", 300, 175, 20, Theme::ButtonText());
@@ -359,10 +382,24 @@ int main() {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
                 if (CheckCollisionPointRec(mouse, payBtn)) {
-                    finalPrice = currentShow->GetTotalPrice();
-                    if (finalPrice > 0) {
-                        state = PAYMENT;
-                        paymentTimer = 0;
+                    // Add selected seats to cart (anonymous allowed)
+                    Booking b;
+                    b.bookingId = rand() % 10000;
+                    b.movieTitle = movies[selectedMovie].title;
+                    b.totalPrice = currentShow->GetTotalPrice();
+
+                    for (auto& s : currentShow->seats) {
+                        if (s.state == SELECTED) {
+                            b.seatIds.push_back(s.id);
+                            s.state = AVAILABLE; // release selection
+                        }
+                    }
+
+                    if (!b.seatIds.empty()) {
+                        cart.push_back(b);
+                        cartMessage = "Added to cart";
+                    } else {
+                        cartMessage = "No seats selected";
                     }
                 }
 
