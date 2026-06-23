@@ -303,6 +303,78 @@ int main() {
             }
         }
 
+        else if (state == CART)
+        {
+            DrawText("Your Cart", 80, 30, 40, Theme::Primary());
+
+            int y = 100;
+
+            if (cart.empty()) {
+                DrawText("Cart is empty", 100, 100, 24, Theme::SecondaryText());
+            }
+
+            for (int i = 0; i < (int)cart.size(); i++) {
+                Booking &b = cart[i];
+
+                Rectangle card = { 80, (float)y, 800, 100 };
+                DrawRectangleRec(card, Theme::Panel());
+                DrawRectangleLinesEx(card, 2, Theme::Outline());
+
+                DrawText(b.movieTitle.c_str(), 100, y + 10, 22, Theme::Primary());
+                DrawText(TextFormat("Seats: %d", (int)b.seatIds.size()), 100, y + 40, 18, Theme::Text());
+                DrawText(TextFormat("Total: $%d", b.totalPrice), 620, y + 30, 22, Theme::Success());
+
+                Rectangle buyBtn = { 650, (float)y + 10, 100, 30 };
+                Rectangle removeBtn = { 760, (float)y + 10, 100, 30 };
+
+                DrawRectangleRec(buyBtn, Theme::Primary());
+                DrawText("BUY", 690, y + 18, 18, Theme::ButtonText());
+
+                DrawRectangleRec(removeBtn, Theme::Button());
+                DrawText("REMOVE", 780, y + 18, 14, Theme::ButtonText());
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Vector2 mpos = GetMousePosition();
+                    if (CheckCollisionPointRec(mpos, buyBtn)) {
+                        // perform purchase: save booking and mark seats in file
+                        b.SaveToFile();
+
+                        // also append movie seat booking line so Show::LoadBookedSeats can pick it up
+                        std::ofstream file("assets/bookings.txt", std::ios::app);
+                        file << b.movieTitle << ":";
+                        for (int j = 0; j < (int)b.seatIds.size(); j++) {
+                            if (j) file << ",";
+                            file << b.seatIds[j];
+                        }
+                        file << "\n";
+                        file.close();
+
+                        cart.erase(cart.begin() + i);
+                        cartMessage = "Purchase successful";
+                        break;
+                    }
+
+                    if (CheckCollisionPointRec(mpos, removeBtn)) {
+                        cart.erase(cart.begin() + i);
+                        cartMessage = "Removed from cart";
+                        break;
+                    }
+                }
+
+                y += 130;
+            }
+
+            Rectangle backBtn = { 400, 600, 200, 50 };
+            DrawRectangleRec(backBtn, Theme::Button());
+            DrawText("BACK", 470, 615, 20, Theme::ButtonText());
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (CheckCollisionPointRec(GetMousePosition(), backBtn)) {
+                    state = HOME;
+                }
+            }
+        }
+
         else if (state == MAIN_MENU) {
 
             DrawText("SiCinema", 420, 10, 40, Theme::Primary());
@@ -398,6 +470,8 @@ int main() {
                     if (!b.seatIds.empty()) {
                         cart.push_back(b);
                         cartMessage = "Added to cart";
+                        // After adding to cart, go back to main page
+                        state = HOME;
                     } else {
                         cartMessage = "No seats selected";
                     }
