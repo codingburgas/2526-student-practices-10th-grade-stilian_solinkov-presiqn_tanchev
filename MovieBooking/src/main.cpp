@@ -31,7 +31,8 @@ enum AppState {
     ACCOUNT
 };
 
-AppState state = LOGIN;
+AppState state = HOME;
+bool loggedIn = false;
 
 int selectedMovie = -1;
 Show* currentShow = nullptr;
@@ -117,9 +118,10 @@ int main() {
                     if (loginUsername.empty() || loginPassword.empty()) {
                         loginMessage = "Please enter username and password";
                     } else {
-                        loginMessage = "Login successful";
+                    loginMessage = "Login successful";
                         typingUsername = typingPassword = false;
                         state = HOME;
+                        loggedIn = true;
                     }
                 } else {
                     typingUsername = typingPassword = false;
@@ -147,6 +149,7 @@ int main() {
                     loginMessage = "Login successful";
                     typingUsername = typingPassword = false;
                     state = HOME;
+                    loggedIn = true;
                 }
             }
 
@@ -164,22 +167,31 @@ int main() {
             // Theme button on main page
             Rectangle themeBtn = { 820, 20, 160, 40 };
 
-            Vector2 mouse = GetMousePosition();
-
             // Menu button
             bool menuHover = CheckCollisionPointRec(mouse, menuBtn);
             DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
             DrawText("MENU", 455, 318, 25, Theme::ButtonText());
 
-            // Recent bookings (now Account) button
+            // Recent bookings (Account) button - disabled when not logged in
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
-            DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("ACCOUNT", 435, 408, 25, Theme::ButtonText());
+            if (loggedIn) {
+                DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
+                DrawText("ACCOUNT", 435, 408, 25, Theme::ButtonText());
+            } else {
+                DrawRectangleRec(recentBtn, Theme::Panel());
+                DrawText("ACCOUNT", 435, 408, 25, Theme::SecondaryText());
+            }
+
+            // Login button next to theme button
+            Rectangle loginBtn = { 650, 20, 160, 40 };
+            bool loginHover = CheckCollisionPointRec(mouse, loginBtn);
+            DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("Login", 688, 30, 18, Theme::ButtonText());
 
             // Theme button
             bool themeHover = CheckCollisionPointRec(mouse, themeBtn);
             DrawRectangleRec(themeBtn, themeHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("Light/Dark", 838, 30, 18, Theme::ButtonText());
+            DrawText("Theme", 838, 30, 18, Theme::ButtonText());
 
             // Exit button
             bool exitHover = CheckCollisionPointRec(mouse, exitBtn);
@@ -194,7 +206,11 @@ int main() {
                 }
 
                 if (CheckCollisionPointRec(mouse, recentBtn)) {
-                    state = ACCOUNT;
+                    if (loggedIn) state = ACCOUNT;
+                }
+
+                if (CheckCollisionPointRec(mouse, loginBtn)) {
+                    state = LOGIN;
                 }
 
                 if (CheckCollisionPointRec(mouse, themeBtn)) {
