@@ -28,7 +28,7 @@ enum AppState {
     BOOKING,
     PAYMENT,
     CONFIRMATION,
-    RECENT_BOOKINGS
+    ACCOUNT
 };
 
 AppState state = LOGIN;
@@ -161,6 +161,8 @@ int main() {
             Rectangle menuBtn = { 350, 300, 300, 60 };
             Rectangle recentBtn = { 350, 390, 300, 60 };
             Rectangle exitBtn = { 350, 480, 300, 60 };
+            // Theme button on main page
+            Rectangle themeBtn = { 820, 20, 160, 40 };
 
             Vector2 mouse = GetMousePosition();
 
@@ -169,10 +171,15 @@ int main() {
             DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
             DrawText("MENU", 455, 318, 25, Theme::ButtonText());
 
-            // Recent bookings button
+            // Recent bookings (now Account) button
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
             DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("RECENT BOOKINGS", 390, 408, 25, Theme::ButtonText());
+            DrawText("ACCOUNT", 435, 408, 25, Theme::ButtonText());
+
+            // Theme button
+            bool themeHover = CheckCollisionPointRec(mouse, themeBtn);
+            DrawRectangleRec(themeBtn, themeHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("Light/Dark", 838, 30, 18, Theme::ButtonText());
 
             // Exit button
             bool exitHover = CheckCollisionPointRec(mouse, exitBtn);
@@ -187,7 +194,11 @@ int main() {
                 }
 
                 if (CheckCollisionPointRec(mouse, recentBtn)) {
-                    state = RECENT_BOOKINGS;
+                    state = ACCOUNT;
+                }
+
+                if (CheckCollisionPointRec(mouse, themeBtn)) {
+                    Theme::Toggle();
                 }
 
                 if (CheckCollisionPointRec(mouse, exitBtn)) {
@@ -197,13 +208,16 @@ int main() {
             }
         }
 
-        else if (state == RECENT_BOOKINGS)
+        else if (state == ACCOUNT)
         {
-            DrawText("Recent Bookings", 330, 30, 40, DARKBLUE);
+            // Greeting
+            std::string greet = "Hello " + loginUsername;
+            DrawText(greet.c_str(), 80, 30, 40, Theme::Primary());
 
+            // Recent bookings list below greeting
             std::ifstream file("assets/bookings.txt");
 
-            int y = 120;
+            int y = 100;
 
             std::string bookingId;
             std::string movie;
@@ -248,7 +262,7 @@ int main() {
                     state = HOME;
                 }
             }
-}
+        }
 
         else if (state == MAIN_MENU) {
 
