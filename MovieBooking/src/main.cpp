@@ -36,14 +36,24 @@ enum AppState {
     BOOKING,
     PAYMENT,
     CONFIRMATION,
-    ACCOUNT
+    ACCOUNT,
+    ADMIN_PANEL
 };
 
 AppState state = HOME;
 bool loggedIn = false;
+enum UserRole
+{
+    USER,
+    ADMIN
+};
+
+UserRole currentRole = USER;
+float adminScroll = 0;
 std::vector<Booking> cart;
 std::string cartMessage;
 std::string selectedTime = "";
+int selectedAdminMovie = -1;
 
 int selectedMovie = -1;
 Show* currentShow = nullptr;
@@ -99,6 +109,11 @@ void LoadAccountsFromFile() {
 
 // Login validation function - checks if username and password match a registered account
 bool ValidateLogin(const std::string& username, const std::string& password) {
+    if (username == "admin" && password == "admin123")
+    {
+        currentRole = ADMIN;
+        return true;
+    }
     for (const auto& account : accounts) {
         // Account format: username:password:email
         size_t firstColon = account.find(':');
@@ -419,6 +434,22 @@ int main() {
             DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
             DrawText("MENU", 455, 318, 25, Theme::ButtonText());
 
+            Rectangle adminBtn = { 700, 300, 250, 60 };
+
+            if (currentRole == ADMIN)
+            {
+                Rectangle adminBtn = { 20, 20, 180, 50 };
+
+                DrawRectangleRec(adminBtn, Theme::Button());
+                DrawText("ADMIN PANEL", 35, 35, 20, Theme::ButtonText());
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                    CheckCollisionPointRec(mouse, adminBtn))
+                {
+                    state = ADMIN_PANEL;
+                }
+            }
+
             // Cart button (always accessible)
             bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
             DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
@@ -450,6 +481,12 @@ int main() {
 
                 if (CheckCollisionPointRec(mouse, recentBtn)) {
                     state = CART;
+                }
+
+                if (currentRole == ADMIN &&
+                    CheckCollisionPointRec(mouse, adminBtn))
+                {
+                    state = ADMIN_PANEL;
                 }
 
                 if (CheckCollisionPointRec(mouse, loginBtn)) {
@@ -560,6 +597,7 @@ int main() {
 
                 if (loggedIn && CheckCollisionPointRec(GetMousePosition(), logoutBtn)) {
                     loggedIn = false;
+                    currentRole = USER;
                     loginUsername.clear();
                     state = HOME;
                 }
@@ -949,6 +987,133 @@ int main() {
                 }
             }
         }
+        else if (state == ADMIN_PANEL)
+        {
+            DrawText(
+                "ADMIN PANEL",
+                50,
+                20,
+                40,
+                Theme::Primary()
+            );
+
+            Rectangle backBtn = { 50, 700, 200, 50 };
+
+            DrawRectangleRec(backBtn, Theme::Button());
+
+            DrawText(
+                "BACK",
+                110,
+                715,
+                20,
+                Theme::ButtonText()
+            );
+            adminScroll -= GetMouseWheelMove() * 30;
+
+            int y = 120 + adminScroll;
+
+            for (int i = 0; i < movies.size(); i++)
+            {
+                DrawText(
+                    movies[i].title.c_str(),
+                    50,
+                    y,
+                    25,
+                    Theme::Text()
+                );
+
+                DrawText(
+                    TextFormat("Price: %d$", movies[i].price),
+                    250,
+                    y,
+                    25,
+                    Theme::Text()
+                );
+
+                Rectangle plusBtn =
+                {
+                    450,
+                    (float)y,
+                    40,
+                    40
+                };
+
+                Rectangle minusBtn =
+                {
+                    500,
+                    (float)y,
+                    40,
+                    40
+                };
+
+                Rectangle deleteBtn =
+                {
+                    560,
+                    (float)y,
+                    120,
+                    40
+                };
+                Rectangle backBtn = { 750, 20, 180, 50 };
+
+                DrawRectangleRec(backBtn, Theme::Button());
+
+                DrawText(
+                    "BACK",
+                    800,
+                    25,
+                    25,
+                    Theme::ButtonText()
+                );
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    if (CheckCollisionPointRec(mouse, backBtn))
+                    {
+                        state = HOME;
+                    }
+                }
+                DrawRectangleRec(plusBtn, GREEN);
+                DrawText("+", 465, y + 5, 25, WHITE);
+
+                DrawRectangleRec(minusBtn, ORANGE);
+                DrawText("-", 515, y + 5, 25, WHITE);
+
+                DrawRectangleRec(deleteBtn, RED);
+                DrawText("DELETE", 575, y + 10, 18, WHITE);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    if (CheckCollisionPointRec(mouse, plusBtn))
+                    {
+                        movies[i].price++;
+                    }
+
+                    if (CheckCollisionPointRec(mouse, minusBtn))
+                    {
+                        if (movies[i].price > 1)
+                            movies[i].price--;
+                    }
+
+                    if (CheckCollisionPointRec(mouse, deleteBtn))
+                    {
+                        UnloadTexture(movies[i].poster);
+
+                        movies.erase(movies.begin() + i);
+
+                        break;
+                    }
+                }
+
+                y += 70;
+            }
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (CheckCollisionPointRec(mouse, backBtn))
+                {
+                    state = HOME;
+                }
+            }
+            }
 
         // Theme toggle: press T to toggle theme
         if (IsKeyPressed(KEY_T)) Theme::Toggle();
