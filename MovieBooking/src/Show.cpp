@@ -11,8 +11,8 @@ void Show::InitSeats() {
     seats.clear();
 
     int id = 0;
-    int startX = 120;
-    int startY = 260;
+    int startX = 70;
+    int startY = 360;
     int size = 40;
     int gap = 10;
 

@@ -43,6 +43,7 @@ AppState state = HOME;
 bool loggedIn = false;
 std::vector<Booking> cart;
 std::string cartMessage;
+std::string selectedTime = "";
 
 int selectedMovie = -1;
 Show* currentShow = nullptr;
@@ -146,8 +147,11 @@ bool EmailExists(const std::string& email) {
 void InitMovies() {
 
     movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
+    movies.back().showTimes = { "14:00", "18:00", "21:30" };
     movies.push_back(Movie("Avatar 2", "EN", "Action", 15, "assets/images/avatar.png"));
+    movies.back().showTimes = { "13:00", "17:00", "20:30" };
     movies.push_back(Movie("Oppenheimer", "EN", "Drama", 18, "assets/images/oppenheimer.png"));
+    movies.back().showTimes = { "15:00", "19:00", "22:00" };
     movies.push_back(Movie("Batman", "EN", "Action", 10, "assets/images/batman.png"));
     movies.push_back(Movie("Inception", "EN", "Sci-Fi", 14, "assets/images/inception.png"));
     movies.push_back(Movie("Joker", "EN", "Drama", 11, "assets/images/joker.png"));
@@ -179,6 +183,8 @@ int main() {
             Rectangle userRect = { 300, 220, 400, 40 };
             Rectangle passRect = { 300, 280, 400, 40 };
             Rectangle loginBtn = { 430, 340, 140, 40 };
+            Rectangle backBtn = { 350, 600, 250, 60 };
+
 
             bool userHover = CheckCollisionPointRec(mouse, userRect);
             bool passHover = CheckCollisionPointRec(mouse, passRect);
@@ -197,6 +203,16 @@ int main() {
 
             DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Primary());
             DrawText("LOGIN", 475, 351, 20, Theme::ButtonText());
+
+            DrawRectangleRec(backBtn, Theme::Button());
+            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+
+                if (CheckCollisionPointRec(GetMousePosition(), backBtn)) {
+                    state = HOME;
+                }
+            }
 
             // Create Account button
             Rectangle createBtn = { 430, 400, 140, 40 };
@@ -786,15 +802,44 @@ int main() {
             DrawText(movies[selectedMovie].title.c_str(), 20, 20, 30, Theme::Primary());
             DrawText(TextFormat("Price: %d$", movies[selectedMovie].price), 20, 60, 25, Theme::Success());
             DrawText(TextFormat("Total: %d$", currentShow->GetTotalPrice()), 20, 100, 25, Theme::Text());
+            DrawText(
+                selectedTime.empty() ? "No time selected" : selectedTime.c_str(),
+                20, 230, 20, Theme::Primary()
+            );
+            DrawText("Select Time:", 20, 140, 20, Theme::Text());
 
-            Rectangle payBtn = { 20,160,200,50 };
-            Rectangle backBtn = { 240,160,200,50 };
+            int x = 20;
+            int y = 160;
+
+            for (int i = 0; i < movies[selectedMovie].showTimes.size(); i++)
+            {
+                Rectangle btn = { (float)x, (float)y, 100, 40 };
+
+                bool hover = CheckCollisionPointRec(mouse, btn);
+
+                DrawRectangleRec(btn, hover ? Theme::ButtonHover() : Theme::Button());
+                DrawText(movies[selectedMovie].showTimes[i].c_str(),
+                    x + 20, y + 10, 18, Theme::ButtonText());
+
+                if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    selectedTime = movies[selectedMovie].showTimes[i];
+                }
+
+                x += 120;
+            }
+
+            int topY = 260;      // buttons
+            int timesY = 160;    // showtimes
+
+            Rectangle payBtn = { 20, topY, 200, 50 };
+            Rectangle backBtn = { 240, topY, 200, 50 };
 
             DrawRectangleRec(payBtn, Theme::Primary());
-            DrawText("ADD TO CART", 60, 175, 20, Theme::ButtonText());
+            DrawText("ADD TO CART", 60, 280, 20, Theme::ButtonText());
 
             DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 300, 175, 20, Theme::ButtonText());
+            DrawText("BACK", 300, 280, 20, Theme::ButtonText());
 
             if (currentShow != nullptr) {
                 currentShow->Update();
@@ -807,7 +852,7 @@ int main() {
                     // Add selected seats to cart (anonymous allowed)
                     Booking b;
                     b.bookingId = rand() % 10000;
-                    b.movieTitle = movies[selectedMovie].title;
+                    b.movieTitle = movies[selectedMovie].title + " (" + selectedTime + ")";
                     b.totalPrice = currentShow->GetTotalPrice();
 
                     for (auto& s : currentShow->seats) {

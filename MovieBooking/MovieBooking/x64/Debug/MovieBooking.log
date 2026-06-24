@@ -1,7 +1,1 @@
-﻿  main.cpp
-D:\Project\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(636,30): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\Project\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(636,30): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\Project\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(658,29): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-D:\Project\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(657,29): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  MovieBooking.vcxproj -> D:\Project\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe
+﻿  MovieBooking.vcxproj -> C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe
