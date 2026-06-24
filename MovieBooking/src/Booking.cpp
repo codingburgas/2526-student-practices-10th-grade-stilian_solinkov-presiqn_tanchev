@@ -5,6 +5,7 @@ void Booking::SaveToFile()
 {
     std::ofstream file("assets/bookings.txt", std::ios::app);
 
+    file << "Username: " << username << "\n";
     file << "Booking ID: " << bookingId << "\n";
     file << "Movie: " << movieTitle << "\n";
 

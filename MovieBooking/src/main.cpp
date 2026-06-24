@@ -75,6 +75,27 @@ bool typingRegConfirmPassword = false;
 // Registered accounts (username:password:email format)
 std::vector<std::string> accounts;
 
+// Save accounts to file
+void SaveAccountsToFile() {
+    std::ofstream file("assets/accounts.txt");
+    for (const auto& acc : accounts) {
+        file << acc << "\n";
+    }
+    file.close();
+}
+
+// Load accounts from file
+void LoadAccountsFromFile() {
+    std::ifstream file("assets/accounts.txt");
+    std::string line;
+    while (getline(file, line)) {
+        if (!line.empty()) {
+            accounts.push_back(line);
+        }
+    }
+    file.close();
+}
+
 void InitMovies() {
 
     movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
@@ -94,6 +115,7 @@ int main() {
     SetTargetFPS(60);
 
     InitMovies();
+    LoadAccountsFromFile();  // Load saved accounts at startup
 
     while (!WindowShouldClose()) {
 
@@ -264,6 +286,7 @@ int main() {
                         // Save account to vector
                         std::string accountData = registerUsername + ":" + registerPassword + ":" + registerEmail;
                         accounts.push_back(accountData);
+                        SaveAccountsToFile();  // Save to persistent file
                         registerMessage = "Account created! Redirecting...";
                         // Clear fields and go back to login
                         registerUsername.clear();
@@ -389,38 +412,57 @@ int main() {
             std::string greet = "Hello " + loginUsername;
             DrawText(greet.c_str(), 80, 30, 40, Theme::Primary());
 
-            // Recent bookings list below greeting
+            // Recent bookings list below greeting (filtered by username)
             std::ifstream file("assets/bookings.txt");
 
             int y = 100;
 
-            std::string bookingId;
-            std::string movie;
-            std::string seats;
-            std::string total;
-            std::string separator;
+            std::string line;
+            std::string currentUsername;
+            std::vector<std::string> currentBookingLines;
 
-            while (
-                getline(file, bookingId) &&
-                getline(file, movie) &&
-                getline(file, seats) &&
-                getline(file, total) &&
-                getline(file, separator))
-            {
-                Rectangle card = { 80, (float)y, 800, 120 };
+            while (getline(file, line)) {
+                if (line.find("Username: ") == 0) {
+                    currentUsername = line.substr(10); // Extract username
+                    currentBookingLines.clear();
+                    currentBookingLines.push_back(line);
+                } else if (line.find("---") == 0) {
+                    // End of booking record
+                    if (currentUsername == loginUsername && currentBookingLines.size() > 0) {
+                        // Display this booking (it belongs to current user)
+                        std::string movieLine = "";
+                        std::string bookingLine = "";
+                        std::string seatsLine = "";
+                        std::string totalLine = "";
 
-                DrawRectangleRounded(card, 0.15f, 10, LIGHTGRAY);
-                DrawRectangleRoundedLines(card, 0.15f, 10, DARKGRAY);
+                        for (const auto& l : currentBookingLines) {
+                            if (l.find("Movie: ") == 0) movieLine = l;
+                            if (l.find("Booking ID: ") == 0) bookingLine = l;
+                            if (l.find("Seats: ") == 0) seatsLine = l;
+                            if (l.find("Total Paid: ") == 0) totalLine = l;
+                        }
 
-                DrawText(movie.c_str(), 110, y + 15, 24, DARKBLUE);
+                        if (!movieLine.empty()) {
+                            Rectangle card = { 80, (float)y, 800, 120 };
 
-                DrawText(bookingId.c_str(), 110, y + 50, 18, BLACK);
+                            DrawRectangleRounded(card, 0.15f, 10, LIGHTGRAY);
+                            DrawRectangleRoundedLines(card, 0.15f, 10, DARKGRAY);
 
-                DrawText(seats.c_str(), 110, y + 75, 18, BLACK);
+                            DrawText(movieLine.c_str(), 110, y + 15, 24, DARKBLUE);
 
-                DrawText(total.c_str(), 550, y + 50, 20, DARKGREEN);
+                            DrawText(bookingLine.c_str(), 110, y + 50, 18, BLACK);
 
-                y += 140;
+                            DrawText(seatsLine.c_str(), 110, y + 75, 18, BLACK);
+
+                            DrawText(totalLine.c_str(), 550, y + 50, 20, DARKGREEN);
+
+                            y += 140;
+                        }
+                    }
+                    currentBookingLines.clear();
+                } else if (!line.empty() && currentUsername == loginUsername) {
+                    currentBookingLines.push_back(line);
+                }
             }
 
             file.close();
@@ -486,7 +528,8 @@ int main() {
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mpos = GetMousePosition();
                     if (CheckCollisionPointRec(mpos, buyBtn)) {
-
+                        // Set username before saving
+                        b.username = loggedIn ? loginUsername : "Anonymous";
                         b.SaveToFile();
 
                         finalPrice = b.totalPrice;

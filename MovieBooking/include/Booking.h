@@ -7,6 +7,7 @@ public:
     int bookingId;
     std::string movieTitle;
     int totalPrice;
+    std::string username;  // Track which user made this booking
 
     std::vector<int> seatIds;
 
