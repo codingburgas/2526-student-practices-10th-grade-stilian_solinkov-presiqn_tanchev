@@ -24,6 +24,7 @@ void SaveBooking(const std::string& movieTitle, int price) {
 
 enum AppState {
     LOGIN,
+    REGISTER,
     HOME,
     MAIN_MENU,
     CART,
@@ -54,6 +55,20 @@ std::string loginPassword;
 std::string loginMessage;
 bool typingUsername = false;
 bool typingPassword = false;
+
+// Register UI state
+std::string registerUsername;
+std::string registerEmail;
+std::string registerPassword;
+std::string registerConfirmPassword;
+std::string registerMessage;
+bool typingRegUsername = false;
+bool typingRegEmail = false;
+bool typingRegPassword = false;
+bool typingRegConfirmPassword = false;
+
+// Registered accounts (username:password:email format)
+std::vector<std::string> accounts;
 
 void InitMovies() {
 
@@ -109,8 +124,14 @@ int main() {
             DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Primary());
             DrawText("LOGIN", 475, 351, 20, Theme::ButtonText());
 
+            // Create Account button
+            Rectangle createBtn = { 430, 400, 140, 40 };
+            bool createHover = CheckCollisionPointRec(mouse, createBtn);
+            DrawRectangleRec(createBtn, createHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("CREATE ACCOUNT", 420, 408, 16, Theme::ButtonText());
+
             if (!loginMessage.empty()) {
-                DrawText(loginMessage.c_str(), 360, 400, 18, Theme::Text());
+                DrawText(loginMessage.c_str(), 360, 450, 18, Theme::Text());
             }
 
             // Input handling
@@ -129,6 +150,10 @@ int main() {
                         state = HOME;
                         loggedIn = true;
                     }
+                } else if (CheckCollisionPointRec(mouse, createBtn)) {
+                    // Go to register page
+                    state = REGISTER;
+                    loginMessage = "";
                 } else {
                     typingUsername = typingPassword = false;
                 }
@@ -157,6 +182,114 @@ int main() {
                     state = HOME;
                     loggedIn = true;
                 }
+            }
+
+        } else if (state == REGISTER) {
+
+            // Draw register screen
+            DrawText("Create Account", 380, 80, 48, Theme::Primary());
+
+            Rectangle userRect = { 200, 160, 600, 40 };
+            Rectangle emailRect = { 200, 220, 600, 40 };
+            Rectangle passRect = { 200, 280, 600, 40 };
+            Rectangle confRect = { 200, 340, 600, 40 };
+            Rectangle registerBtn = { 430, 400, 140, 40 };
+            Rectangle backBtn = { 350, 450, 300, 40 };
+
+            DrawRectangleRec(userRect, typingRegUsername ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(userRect, 2, Theme::Outline());
+            DrawText("Username:", 220, 166, 18, Theme::Text());
+            DrawText(registerUsername.c_str(), 400, 166, 18, Theme::Text());
+
+            DrawRectangleRec(emailRect, typingRegEmail ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(emailRect, 2, Theme::Outline());
+            DrawText("Email:", 220, 226, 18, Theme::Text());
+            DrawText(registerEmail.c_str(), 400, 226, 18, Theme::Text());
+
+            DrawRectangleRec(passRect, typingRegPassword ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(passRect, 2, Theme::Outline());
+            DrawText("Password:", 220, 286, 18, Theme::Text());
+            std::string masked1(registerPassword.size(), '*');
+            DrawText(masked1.c_str(), 400, 286, 18, Theme::Text());
+
+            DrawRectangleRec(confRect, typingRegConfirmPassword ? Theme::ButtonHover() : Theme::Panel());
+            DrawRectangleLinesEx(confRect, 2, Theme::Outline());
+            DrawText("Confirm:", 220, 346, 18, Theme::Text());
+            std::string masked2(registerConfirmPassword.size(), '*');
+            DrawText(masked2.c_str(), 400, 346, 18, Theme::Text());
+
+            bool regHover = CheckCollisionPointRec(mouse, registerBtn);
+            DrawRectangleRec(registerBtn, regHover ? Theme::ButtonHover() : Theme::Primary());
+            DrawText("REGISTER", 455, 408, 20, Theme::ButtonText());
+
+            bool backHover = CheckCollisionPointRec(mouse, backBtn);
+            DrawRectangleRec(backBtn, backHover ? Theme::ButtonHover() : Theme::Button());
+            DrawText("BACK TO LOGIN", 410, 458, 18, Theme::ButtonText());
+
+            if (!registerMessage.empty()) {
+                DrawText(registerMessage.c_str(), 250, 500, 18, Theme::Text());
+            }
+
+            // Input handling
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (CheckCollisionPointRec(mouse, userRect)) {
+                    typingRegUsername = true; typingRegEmail = false; typingRegPassword = false; typingRegConfirmPassword = false;
+                } else if (CheckCollisionPointRec(mouse, emailRect)) {
+                    typingRegUsername = false; typingRegEmail = true; typingRegPassword = false; typingRegConfirmPassword = false;
+                } else if (CheckCollisionPointRec(mouse, passRect)) {
+                    typingRegUsername = false; typingRegEmail = false; typingRegPassword = true; typingRegConfirmPassword = false;
+                } else if (CheckCollisionPointRec(mouse, confRect)) {
+                    typingRegUsername = false; typingRegEmail = false; typingRegPassword = false; typingRegConfirmPassword = true;
+                } else if (CheckCollisionPointRec(mouse, registerBtn)) {
+                    // Validate and create account
+                    if (registerUsername.empty() || registerEmail.empty() || registerPassword.empty() || registerConfirmPassword.empty()) {
+                        registerMessage = "Please fill in all fields";
+                    } else if (registerPassword != registerConfirmPassword) {
+                        registerMessage = "Passwords do not match";
+                    } else {
+                        // Save account to vector
+                        std::string accountData = registerUsername + ":" + registerPassword + ":" + registerEmail;
+                        accounts.push_back(accountData);
+                        registerMessage = "Account created! Redirecting...";
+                        // Clear fields and go back to login
+                        registerUsername.clear();
+                        registerEmail.clear();
+                        registerPassword.clear();
+                        registerConfirmPassword.clear();
+                        typingRegUsername = typingRegEmail = typingRegPassword = typingRegConfirmPassword = false;
+                        state = LOGIN;
+                    }
+                } else if (CheckCollisionPointRec(mouse, backBtn)) {
+                    // Go back to login
+                    registerUsername.clear();
+                    registerEmail.clear();
+                    registerPassword.clear();
+                    registerConfirmPassword.clear();
+                    registerMessage = "";
+                    typingRegUsername = typingRegEmail = typingRegPassword = typingRegConfirmPassword = false;
+                    state = LOGIN;
+                } else {
+                    typingRegUsername = typingRegEmail = typingRegPassword = typingRegConfirmPassword = false;
+                }
+            }
+
+            // Character input for register
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (key >= 32 && key <= 125) {
+                    if (typingRegUsername && registerUsername.size() < 64) registerUsername.push_back((char)key);
+                    else if (typingRegEmail && registerEmail.size() < 64) registerEmail.push_back((char)key);
+                    else if (typingRegPassword && registerPassword.size() < 64) registerPassword.push_back((char)key);
+                    else if (typingRegConfirmPassword && registerConfirmPassword.size() < 64) registerConfirmPassword.push_back((char)key);
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                if (typingRegUsername && !registerUsername.empty()) registerUsername.pop_back();
+                if (typingRegEmail && !registerEmail.empty()) registerEmail.pop_back();
+                if (typingRegPassword && !registerPassword.empty()) registerPassword.pop_back();
+                if (typingRegConfirmPassword && !registerConfirmPassword.empty()) registerConfirmPassword.pop_back();
             }
 
         } else if (state == HOME) {
