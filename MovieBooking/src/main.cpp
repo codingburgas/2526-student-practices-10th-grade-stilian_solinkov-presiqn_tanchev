@@ -115,6 +115,34 @@ bool ValidateLogin(const std::string& username, const std::string& password) {
     return false; // Invalid credentials
 }
 
+// Check if username already exists
+bool UsernameExists(const std::string& username) {
+    for (const auto& account : accounts) {
+        size_t firstColon = account.find(':');
+        if (firstColon != std::string::npos) {
+            std::string accUsername = account.substr(0, firstColon);
+            if (accUsername == username) {
+                return true; // Username exists
+            }
+        }
+    }
+    return false; // Username doesn't exist
+}
+
+// Check if email already exists
+bool EmailExists(const std::string& email) {
+    for (const auto& account : accounts) {
+        size_t secondColon = account.rfind(':');
+        if (secondColon != std::string::npos) {
+            std::string accEmail = account.substr(secondColon + 1);
+            if (accEmail == email) {
+                return true; // Email exists
+            }
+        }
+    }
+    return false; // Email doesn't exist
+}
+
 void InitMovies() {
 
     movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
@@ -301,6 +329,10 @@ int main() {
                     // Validate and create account
                     if (registerUsername.empty() || registerEmail.empty() || registerPassword.empty() || registerConfirmPassword.empty()) {
                         registerMessage = "Please fill in all fields";
+                    } else if (UsernameExists(registerUsername)) {
+                        registerMessage = "Already taken";
+                    } else if (EmailExists(registerEmail)) {
+                        registerMessage = "Already taken";
                     } else if (!IsValidEmail(registerEmail)) {
                         registerMessage = "Invalid email (must contain @)";
                     } else if (registerPassword != registerConfirmPassword) {
