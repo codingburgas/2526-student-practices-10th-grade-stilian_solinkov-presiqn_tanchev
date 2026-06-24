@@ -3,6 +3,7 @@
 #include "../include/Show.h"
 #include "../include/Theme.h"
 #include "../include/Booking.h"
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -44,6 +45,8 @@ int finalPrice = 0;
 float paymentTimer = 0;
 
 std::vector<Movie> movies;
+std::string searchText;
+bool typingSearch = false;
 
 // Login UI state
 std::string loginUsername;
@@ -322,7 +325,7 @@ int main() {
 
                 DrawText(b.movieTitle.c_str(), 100, y + 10, 22, Theme::Primary());
                 DrawText(TextFormat("Seats: %d", (int)b.seatIds.size()), 100, y + 40, 18, Theme::Text());
-                DrawText(TextFormat("Total: $%d", b.totalPrice), 620, y + 30, 22, Theme::Success());
+                DrawText(TextFormat("Total: $%d", b.totalPrice), 740, y + 60, 22, Theme::Success());
 
                 Rectangle buyBtn = { 650, (float)y + 10, 100, 30 };
                 Rectangle removeBtn = { 760, (float)y + 10, 100, 30 };
@@ -336,18 +339,23 @@ int main() {
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mpos = GetMousePosition();
                     if (CheckCollisionPointRec(mpos, buyBtn)) {
-                        // perform purchase: save booking and mark seats in file
+
                         b.SaveToFile();
 
-                        // also append movie seat booking line so Show::LoadBookedSeats can pick it up
+                        finalPrice = b.totalPrice;
+                        paymentTimer = 0;
+                        state = PAYMENT;
+
                         std::ofstream file("assets/bookings.txt", std::ios::app);
                         file << b.movieTitle << ":";
+
                         for (int j = 0; j < (int)b.seatIds.size(); j++) {
                             if (j) file << ",";
                             file << b.seatIds[j];
                         }
                         file << "\n";
                         file.close();
+
 
                         cart.erase(cart.begin() + i);
                         cartMessage = "Purchase successful";
@@ -377,7 +385,67 @@ int main() {
 
         else if (state == MAIN_MENU) {
 
-            DrawText("SiCinema", 420, 10, 40, Theme::Primary());
+            int screenW = GetScreenWidth();
+
+            Rectangle searchBar = {
+                screenW - 20 - 300,
+                70,
+                300,
+                40
+            };
+
+            DrawRectangleRec(
+                searchBar,
+                typingSearch ?
+                Theme::ButtonHover() :
+                Theme::Panel()
+            );
+
+            DrawRectangleLinesEx(
+                searchBar,
+                2,
+                Theme::Outline()
+            );
+
+            DrawText(
+                searchText.empty() ? "Search movie..." : searchText.c_str(),
+                searchBar.x + 10,
+                searchBar.y + 10,
+                20,
+                Theme::Text()
+            );
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                typingSearch =
+                    CheckCollisionPointRec(
+                        GetMousePosition(),
+                        searchBar
+                    );
+            }
+
+            if (typingSearch)
+            {
+                int key = GetCharPressed();
+
+                while (key > 0)
+                {
+                    if (key >= 32 && key <= 125)
+                    {
+                        searchText.push_back((char)key);
+                    }
+
+                    key = GetCharPressed();
+                }
+
+                if (IsKeyPressed(KEY_BACKSPACE) &&
+                    !searchText.empty())
+                {
+                    searchText.pop_back();
+                }
+            }
+
+            DrawText("SiCinema", 20, 10, 40, Theme::Primary());
 
             Rectangle backBtn = { 350, 600, 250, 60 };
 
@@ -395,10 +463,47 @@ int main() {
             int w = 280;
             int h = 140;
 
+            int visibleIndex = 0;
+
             for (int i = 0; i < movies.size(); i++) {
 
-                int x = 80 + (i % cols) * (w + 20);
-                int y = 120 + (i / cols) * (h + 20);
+                if (!searchText.empty())
+                {
+                    std::string title = movies[i].title;
+                    std::string search = searchText;
+
+                    std::transform(
+                        title.begin(),
+                        title.end(),
+                        title.begin(),
+                        ::tolower
+                    );
+
+                    std::transform(
+                        search.begin(),
+                        search.end(),
+                        search.begin(),
+                        ::tolower
+                    );
+
+                    if (title.find(search) ==
+                        std::string::npos)
+                    {
+                        continue;
+                    }
+                }
+
+                int x =
+                    80 +
+                    (visibleIndex % 3) *
+                    (w + 20);
+
+                int y =
+                    120 +
+                    (visibleIndex / 3) *
+                    (h + 20);
+
+                visibleIndex++;
 
                 Rectangle card = { (float)x, (float)y, (float)w, (float)h };
 
@@ -543,8 +648,6 @@ int main() {
                             booking.seatIds.push_back(s.id);
                         }
                     }
-
-                    booking.SaveToFile();
 
                     currentShow->ConfirmBooking();
                     currentShow->SaveBookedSeats();
