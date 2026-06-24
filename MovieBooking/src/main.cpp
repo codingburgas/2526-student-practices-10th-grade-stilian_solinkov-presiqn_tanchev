@@ -22,6 +22,11 @@ void SaveBooking(const std::string& movieTitle, int price) {
     file.close();
 }
 
+// Email validation function
+bool IsValidEmail(const std::string& email) {
+    return email.find('@') != std::string::npos;
+}
+
 enum AppState {
     LOGIN,
     REGISTER,
@@ -202,9 +207,16 @@ int main() {
             DrawText(registerUsername.c_str(), 400, 166, 18, Theme::Text());
 
             DrawRectangleRec(emailRect, typingRegEmail ? Theme::ButtonHover() : Theme::Panel());
-            DrawRectangleLinesEx(emailRect, 2, Theme::Outline());
+            // Show email validation state: red border if invalid (when not typing), green if valid
+            Color emailBorderColor = (!registerEmail.empty() && !IsValidEmail(registerEmail)) ? RED : Theme::Outline();
+            DrawRectangleLinesEx(emailRect, 2, emailBorderColor);
             DrawText("Email:", 220, 226, 18, Theme::Text());
             DrawText(registerEmail.c_str(), 400, 226, 18, Theme::Text());
+
+            // Show email validation warning
+            if (!registerEmail.empty() && !IsValidEmail(registerEmail)) {
+                DrawText("(missing @)", 400, 243, 14, RED);
+            }
 
             DrawRectangleRec(passRect, typingRegPassword ? Theme::ButtonHover() : Theme::Panel());
             DrawRectangleLinesEx(passRect, 2, Theme::Outline());
@@ -244,6 +256,8 @@ int main() {
                     // Validate and create account
                     if (registerUsername.empty() || registerEmail.empty() || registerPassword.empty() || registerConfirmPassword.empty()) {
                         registerMessage = "Please fill in all fields";
+                    } else if (!IsValidEmail(registerEmail)) {
+                        registerMessage = "Invalid email (must contain @)";
                     } else if (registerPassword != registerConfirmPassword) {
                         registerMessage = "Passwords do not match";
                     } else {
