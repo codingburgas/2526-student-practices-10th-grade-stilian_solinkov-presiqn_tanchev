@@ -30,3 +30,19 @@ Total Paid: $26
 ----------------------
 Matrix:2,4
 Matrix:
+Username: 123
+Booking ID: 41
+Movie: Avatar 2
+Seats: 12 13 14 20 22 28 29 30 
+Total Paid: $120
+----------------------
+Avatar 2:12,13,14,20,22,28,29,30
+Avatar 2:0,1,2,3,4,5,6,7,21
+Username: asen
+Booking ID: 6500
+Movie: Dune
+Seats: 3 4 5 10 19 20 21 29 34 35 36 
+Total Paid: $176
+----------------------
+Dune:3,4,5,10,19,20,21,29,34,35,36
+Dune:

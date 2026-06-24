@@ -96,6 +96,25 @@ void LoadAccountsFromFile() {
     file.close();
 }
 
+// Login validation function - checks if username and password match a registered account
+bool ValidateLogin(const std::string& username, const std::string& password) {
+    for (const auto& account : accounts) {
+        // Account format: username:password:email
+        size_t firstColon = account.find(':');
+        size_t secondColon = account.find(':', firstColon + 1);
+
+        if (firstColon != std::string::npos && secondColon != std::string::npos) {
+            std::string accUsername = account.substr(0, firstColon);
+            std::string accPassword = account.substr(firstColon + 1, secondColon - firstColon - 1);
+
+            if (accUsername == username && accPassword == password) {
+                return true; // Valid credentials
+            }
+        }
+    }
+    return false; // Invalid credentials
+}
+
 void InitMovies() {
 
     movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
@@ -171,11 +190,13 @@ int main() {
                     // attempt login
                     if (loginUsername.empty() || loginPassword.empty()) {
                         loginMessage = "Please enter username and password";
-                    } else {
-                    loginMessage = "Login successful";
+                    } else if (ValidateLogin(loginUsername, loginPassword)) {
+                        loginMessage = "Login successful";
                         typingUsername = typingPassword = false;
                         state = HOME;
                         loggedIn = true;
+                    } else {
+                        loginMessage = "Invalid username/password";
                     }
                 } else if (CheckCollisionPointRec(mouse, createBtn)) {
                     // Go to register page
@@ -203,11 +224,13 @@ int main() {
             if (IsKeyPressed(KEY_ENTER)) {
                 if (loginUsername.empty() || loginPassword.empty()) {
                     loginMessage = "Please enter username and password";
-                } else {
+                } else if (ValidateLogin(loginUsername, loginPassword)) {
                     loginMessage = "Login successful";
                     typingUsername = typingPassword = false;
                     state = HOME;
                     loggedIn = true;
+                } else {
+                    loginMessage = "Invalid username/password";
                 }
             }
 
