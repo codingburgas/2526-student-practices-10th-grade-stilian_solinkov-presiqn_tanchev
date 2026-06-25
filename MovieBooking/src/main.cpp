@@ -207,8 +207,10 @@ static void DrawRoundedPanel(Rectangle rect, Color bg) {
     DrawRectangleRounded(rect, 0.12f, 6, bg);
 }
 
-int main() {
 
+
+int main() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1000, 700, "SiCinema");
     SetTargetFPS(60);
 
@@ -992,7 +994,7 @@ int main() {
                     for (auto& s : currentShow->seats) {
                         if (s.state == SELECTED) {
                             b.seatIds.push_back(s.id);
-                            s.state = AVAILABLE; // release selection
+                            s.state = SELECTED;
                         }
                     }
 
