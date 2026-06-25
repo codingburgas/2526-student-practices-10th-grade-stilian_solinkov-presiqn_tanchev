@@ -3,3 +3,4 @@
 asen:1:a@
 presko:1234:presko@gmail.com
 azsum:1234:azsum@gmail.com
+sasho:1234:sasho@gmail.com

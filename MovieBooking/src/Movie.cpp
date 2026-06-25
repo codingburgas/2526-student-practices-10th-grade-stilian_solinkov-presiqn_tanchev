@@ -2,11 +2,13 @@
 
 Movie::Movie() {}
 
-Movie::Movie(std::string t, std::string l, std::string g, int p, const char* imagePath) {
+Movie::Movie(std::string t, std::string l, std::string g, int p, int d, std::string r, const char* imagePath) {
     title = t;
     language = l;
     genre = g;
     price = p;
+    duration = d;
+    rating = r;
 
     poster = LoadTexture(imagePath);
 

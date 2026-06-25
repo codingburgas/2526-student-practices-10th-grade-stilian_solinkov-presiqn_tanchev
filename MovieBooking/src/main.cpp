@@ -41,6 +41,7 @@ enum AppState {
 };
 
 AppState state = HOME;
+AppState prevState = HOME;
 bool loggedIn = false;
 enum UserRole
 {
@@ -64,6 +65,7 @@ float paymentTimer = 0;
 std::vector<Movie> movies;
 std::string searchText;
 bool typingSearch = false;
+float movieScroll = 0.0f;
 
 // Login UI state
 std::string loginUsername;
@@ -161,24 +163,69 @@ bool EmailExists(const std::string& email) {
 
 void InitMovies() {
 
-    movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, "assets/images/interstellar.png"));
+    movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, 169, "A", "assets/images/interstellar.png"));
     movies.back().showTimes = { "14:00", "18:00", "21:30" };
-    movies.push_back(Movie("Avatar 2", "EN", "Action", 15, "assets/images/avatar.png"));
+
+    movies.push_back(Movie("Avatar 2", "EN", "Action", 15, 192, "B", "assets/images/avatar.png"));
     movies.back().showTimes = { "13:00", "17:00", "20:30" };
-    movies.push_back(Movie("Oppenheimer", "EN", "Drama", 18, "assets/images/oppenheimer.png"));
+
+    movies.push_back(Movie("Oppenheimer", "EN", "Drama", 18, 180, "A", "assets/images/oppenheimer.png"));
     movies.back().showTimes = { "15:00", "19:00", "22:00" };
-    movies.push_back(Movie("Batman", "EN", "Action", 10, "assets/images/batman.png"));
-    movies.push_back(Movie("Inception", "EN", "Sci-Fi", 14, "assets/images/inception.png"));
-    movies.push_back(Movie("Joker", "EN", "Drama", 11, "assets/images/joker.png"));
-    movies.push_back(Movie("Titanic", "EN", "Romance", 9, "assets/images/titanic.png"));
-    movies.push_back(Movie("Dune", "EN", "Sci-Fi", 16, "assets/images/dune.png"));
-    movies.push_back(Movie("Matrix", "EN", "Action", 13, "assets/images/matrix.png"));
+
+    movies.push_back(Movie("The Dark Knight", "EN", "Action", 13, 152, "A", "assets/images/batman.png"));
+    movies.back().showTimes = { "16:00", "19:00", "22:30" };
+
+    movies.push_back(Movie("Inception", "EN", "Sci-Fi", 14, 148, "A", "assets/images/inception.png"));
+    movies.back().showTimes = { "12:30", "15:30", "20:00" };
+
+    movies.push_back(Movie("Joker", "EN", "Drama", 11, 122, "B", "assets/images/joker.png"));
+    movies.back().showTimes = { "13:00", "18:00", "21:00" };
+
+    movies.push_back(Movie("Titanic", "EN", "Romance", 9, 195, "B", "assets/images/titanic.png"));
+    movies.back().showTimes = { "11:00", "14:00", "17:00" };
+
+    movies.push_back(Movie("Dune", "EN", "Sci-Fi", 16, 155, "B", "assets/images/dune.png"));
+    movies.back().showTimes = { "14:15", "19:15", "22:15" };
+
+    movies.push_back(Movie("Matrix", "EN", "Action", 13, 136, "A", "assets/images/matrix.png"));
+    movies.back().showTimes = { "12:00", "16:00", "20:00" };
+
+    movies.push_back(Movie("Pulp Fiction", "EN", "Crime", 10, 154, "B", "assets/images/joker.png"));
+    movies.back().showTimes = { "15:00", "19:30" };
+
+    movies.push_back(Movie("The Shawshank Redemption", "EN", "Drama", 12, 142, "A", "assets/images/titanic.png"));
+    movies.back().showTimes = { "13:30", "18:30" };
+
+    movies.push_back(Movie("Parasite", "EN", "Thriller", 11, 132, "A", "assets/images/matrix.png"));
+    movies.back().showTimes = { "17:00", "20:30" };
+}
+
+// UI helper functions: rounded buttons and panels
+static void DrawRoundedButton(Rectangle rect, const char* label, Font font, int fontSize, Color bg, Color textColor) {
+    float round = 0.25f;
+    int segments = 8;
+    DrawRectangleRounded(rect, round, segments, bg);
+    // removed border lines for navbar buttons
+    // DrawRectangleRoundedLines(rect, round, segments, Theme::Outline());
+    Vector2 textSize = MeasureTextEx(font, label, fontSize, 1.0f);
+    Vector2 pos = { rect.x + (rect.width - textSize.x) / 2.0f, rect.y + (rect.height - textSize.y) / 2.0f };
+    DrawTextEx(font, label, pos, fontSize, 1.0f, textColor);
+}
+
+static void DrawRoundedPanel(Rectangle rect, Color bg) {
+    DrawRectangleRounded(rect, 0.12f, 6, bg);
 }
 
 int main() {
 
     InitWindow(1000, 700, "SiCinema");
     SetTargetFPS(60);
+
+    // Load application font (fallback to default)
+    Font appFont = GetFontDefault();
+    if (FileExists("assets/fonts/Roboto-Regular.ttf")) {
+        appFont = LoadFontEx("assets/fonts/Roboto-Regular.ttf", 32, NULL, 0);
+    }
 
     InitMovies();
     LoadAccountsFromFile();  // Load saved accounts at startup
@@ -189,6 +236,55 @@ int main() {
 
         BeginDrawing();
         ClearBackground(Theme::Background());
+
+        // Global navbar on all pages except seat-booking (BOOKING)
+        int screenW = GetScreenWidth();
+        if (state != BOOKING) {
+            Rectangle navBar = { 0, 0, (float)screenW, 70 };
+            DrawRoundedPanel(navBar, Theme::NavBar());
+
+            int navBtnW = 110; int navBtnH = 40; int navSpacing = 12;
+            Rectangle navThemeBtn = { (float)(screenW - 20 - navBtnW), 15, (float)navBtnW, (float)navBtnH };
+            Rectangle navCartBtn = { (float)(navThemeBtn.x - navSpacing - navBtnW), 15, (float)navBtnW, (float)navBtnH };
+            Rectangle navLoginBtn = { (float)(navCartBtn.x - navSpacing - navBtnW), 15, (float)navBtnW, (float)navBtnH };
+
+            // Brand on left
+            DrawTextEx(appFont, "SiCinema", Vector2{20.0f, 18.0f}, 30.0f, 2.0f, Theme::ButtonText());
+
+            // Admin button next to brand if admin
+            if (currentRole == ADMIN) {
+                Rectangle navAdminBtn = { 160.0f, 15.0f, 120.0f, 40.0f };
+                bool navAdminHover = CheckCollisionPointRec(mouse, navAdminBtn);
+                DrawRoundedButton(navAdminBtn, "Admin", appFont, 18, navAdminHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, navAdminBtn)) state = ADMIN_PANEL;
+            }
+
+            bool navLoginHover = CheckCollisionPointRec(mouse, navLoginBtn);
+            DrawRoundedButton(navLoginBtn, (!loggedIn) ? "Login" : (state == ACCOUNT ? "Logout" : "Account"), appFont, 18, navLoginHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
+
+            bool navCartHover = CheckCollisionPointRec(mouse, navCartBtn);
+            DrawRoundedButton(navCartBtn, TextFormat("Cart (%d)", (int)cart.size()), appFont, 18, navCartHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
+
+            bool navThemeHover = CheckCollisionPointRec(mouse, navThemeBtn);
+            DrawRoundedButton(navThemeBtn, "Theme", appFont, 18, navThemeHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (CheckCollisionPointRec(mouse, navLoginBtn)) {
+                    if (!loggedIn) state = LOGIN;
+                    else {
+                        if (state == ACCOUNT) {
+                            loggedIn = false; loginUsername.clear(); state = HOME;
+                        } else state = ACCOUNT;
+                    }
+                }
+                if (CheckCollisionPointRec(mouse, navCartBtn)) {
+                    state = CART;
+                }
+                if (CheckCollisionPointRec(mouse, navThemeBtn)) {
+                    Theme::Toggle();
+                }
+            }
+        }
 
         if (state == LOGIN) {
 
@@ -216,11 +312,9 @@ int main() {
             std::string masked(loginPassword.size(), '*');
             DrawText(masked.c_str(), 420, 286, 18, Theme::Text());
 
-            DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Primary());
-            DrawText("LOGIN", 475, 351, 20, Theme::ButtonText());
+            DrawRoundedButton(loginBtn, "LOGIN", appFont, 20, loginHover ? Theme::ButtonHover() : Theme::Primary(), Theme::ButtonText());
 
-            DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
+            DrawRoundedButton(backBtn, "BACK", appFont, 25, Theme::Button(), Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
@@ -232,8 +326,7 @@ int main() {
             // Create Account button
             Rectangle createBtn = { 430, 400, 140, 40 };
             bool createHover = CheckCollisionPointRec(mouse, createBtn);
-            DrawRectangleRec(createBtn, createHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("CREATE ACCOUNT", 420, 408, 16, Theme::ButtonText());
+            DrawRoundedButton(createBtn, "CREATE ACCOUNT", appFont, 16, createHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
 
             if (!loginMessage.empty()) {
                 DrawText(loginMessage.c_str(), 360, 450, 18, Theme::Text());
@@ -335,12 +428,10 @@ int main() {
             DrawText(masked2.c_str(), 400, 346, 18, Theme::Text());
 
             bool regHover = CheckCollisionPointRec(mouse, registerBtn);
-            DrawRectangleRec(registerBtn, regHover ? Theme::ButtonHover() : Theme::Primary());
-            DrawText("REGISTER", 455, 408, 20, Theme::ButtonText());
+            DrawRoundedButton(registerBtn, "REGISTER", appFont, 20, regHover ? Theme::ButtonHover() : Theme::Primary(), Theme::ButtonText());
 
             bool backHover = CheckCollisionPointRec(mouse, backBtn);
-            DrawRectangleRec(backBtn, backHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("BACK TO LOGIN", 410, 458, 18, Theme::ButtonText());
+            DrawRoundedButton(backBtn, "BACK TO LOGIN", appFont, 18, backHover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
 
             if (!registerMessage.empty()) {
                 DrawText(registerMessage.c_str(), 250, 500, 18, Theme::Text());
@@ -417,113 +508,162 @@ int main() {
 
         } else if (state == HOME) {
 
-            // Title
-            DrawText("SiCinema", 340, 120, 60, Theme::Primary());
+            // Movie grid shown directly on HOME (navbar remains)
+            DrawTextEx(appFont, "Movie Ticket Booking System", Vector2{300.0f, 160.0f}, 25.0f, 1.0f, Theme::SecondaryText());
 
-            DrawText("Movie Ticket Booking System", 300, 190, 25, Theme::SecondaryText());
+            // Search bar under navbar - use contrasting background so it's always visible
+            Rectangle searchBar = { screenW - 20 - 300, 80, 300, 40 };
+            Color searchBg = (Theme::mode == Theme::DARK) ? Color{30, 60, 120, 255} : Theme::Panel();
+            DrawRoundedPanel(searchBar, typingSearch ? Theme::ButtonHover() : searchBg);
+            DrawTextEx(appFont, searchText.empty() ? "Search movie..." : searchText.c_str(), Vector2{ searchBar.x + 10.0f, searchBar.y + 8.0f }, 20.0f, 1.0f, WHITE);
 
-            // Buttons
-            Rectangle menuBtn = { 350, 300, 300, 60 };
-            Rectangle recentBtn = { 350, 390, 300, 60 };
-            Rectangle exitBtn = { 350, 480, 300, 60 };
-            // Theme button on main page
-            Rectangle themeBtn = { 820, 20, 160, 40 };
-
-            // Menu button
-            bool menuHover = CheckCollisionPointRec(mouse, menuBtn);
-            DrawRectangleRec(menuBtn, menuHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("MENU", 455, 318, 25, Theme::ButtonText());
-
-            Rectangle adminBtn = { 700, 300, 250, 60 };
-
-            if (currentRole == ADMIN)
-            {
-                Rectangle adminBtn = { 20, 20, 180, 50 };
-
-                DrawRectangleRec(adminBtn, Theme::Button());
-                DrawText("ADMIN PANEL", 35, 35, 20, Theme::ButtonText());
-
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                    CheckCollisionPointRec(mouse, adminBtn))
-                {
-                    state = ADMIN_PANEL;
-                }
-            }
-
-            // Cart button (always accessible)
-            bool recentHover = CheckCollisionPointRec(mouse, recentBtn);
-            DrawRectangleRec(recentBtn, recentHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("CART", 435, 408, 25, Theme::ButtonText());
-
-            // Login / Account / Logout button next to theme button
-            Rectangle loginBtn = { 650, 20, 160, 40 };
-            bool loginHover = CheckCollisionPointRec(mouse, loginBtn);
-            DrawRectangleRec(loginBtn, loginHover ? Theme::ButtonHover() : Theme::Button());
-            const char* topLabel = (!loggedIn) ? "Login" : (state == ACCOUNT ? "Logout" : "Account");
-            DrawText(topLabel, 688, 30, 18, Theme::ButtonText());
-
-            // Theme button
-            bool themeHover = CheckCollisionPointRec(mouse, themeBtn);
-            DrawRectangleRec(themeBtn, themeHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("Theme", 838, 30, 18, Theme::ButtonText());
-
-            // Exit button
-            bool exitHover = CheckCollisionPointRec(mouse, exitBtn);
-            DrawRectangleRec(exitBtn, exitHover ? Theme::ButtonHover() : Theme::Button());
-            DrawText("EXIT", 465, 498, 25, Theme::ButtonText());
-
-            // Mouse Input
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-
-                if (CheckCollisionPointRec(mouse, menuBtn)) {
-                    state = MAIN_MENU;
-                }
-
-                if (CheckCollisionPointRec(mouse, recentBtn)) {
-                    state = CART;
-                }
-
-                if (currentRole == ADMIN &&
-                    CheckCollisionPointRec(mouse, adminBtn))
-                {
-                    state = ADMIN_PANEL;
-                }
-
-                if (CheckCollisionPointRec(mouse, loginBtn)) {
-                    if (!loggedIn) state = LOGIN;
-                    else {
-                        if (state == ACCOUNT) {
-                            // perform logout
-                            loggedIn = false;
-                            loginUsername.clear();
-                            state = HOME;
-                        } else {
-                            state = ACCOUNT;
-                        }
-                    }
-                }
-
-                if (CheckCollisionPointRec(mouse, themeBtn)) {
-                    Theme::Toggle();
-                }
-
-                if (CheckCollisionPointRec(mouse, exitBtn)) {
-                    CloseWindow();
-                    return 0;
-                }
+                typingSearch = CheckCollisionPointRec(GetMousePosition(), searchBar);
             }
+
+            if (typingSearch) {
+                int key = GetCharPressed();
+                while (key > 0) {
+                    if (key >= 32 && key <= 125) searchText.push_back((char)key);
+                    key = GetCharPressed();
+                }
+                if (IsKeyPressed(KEY_BACKSPACE) && !searchText.empty()) searchText.pop_back();
+            }
+
+            int w = 840; int h = 160; int visibleIndex = 0; int startY = 220; int gap = 20;
+
+                                    // Build filtered list based on search
+                                    std::vector<int> visibleIndices;
+                                    for (int i = 0; i < (int)movies.size(); i++) {
+                                        if (!searchText.empty()) {
+                                            std::string title = movies[i].title;
+                                            std::string search = searchText;
+                                            std::transform(title.begin(), title.end(), title.begin(), ::tolower);
+                                            std::transform(search.begin(), search.end(), search.begin(), ::tolower);
+                                            if (title.find(search) == std::string::npos) continue;
+                                        }
+                                        visibleIndices.push_back(i);
+                                    }
+
+                                    // Vertical scroll handling (only when mouse over list area)
+                                    float totalHeight = (h + gap) * (float)visibleIndices.size();
+                                    float viewHeight = (float)(GetScreenHeight() - startY - 20);
+                                    if (totalHeight > viewHeight) {
+                                        if (mouse.y >= startY && mouse.y <= GetScreenHeight()) {
+                                            float wheel = GetMouseWheelMove();
+                                            movieScroll -= wheel * 30.0f;
+                                        }
+                                        if (movieScroll < 0) movieScroll = 0;
+                                        float maxScroll = std::max(0.0f, totalHeight - viewHeight);
+                                        if (movieScroll > maxScroll) movieScroll = maxScroll;
+                                    } else {
+                                        movieScroll = 0;
+                                    }
+
+                                    // Clip drawing to content area so navbar/searchbar stay on top
+                                    BeginScissorMode(0, startY, GetScreenWidth(), GetScreenHeight() - startY);
+
+                                    for (int idx = 0; idx < (int)visibleIndices.size(); idx++) {
+                                        int i = visibleIndices[idx];
+
+                                        int x = 80;
+                                        int y = startY + idx * (h + gap) - (int)movieScroll;
+
+                                        Rectangle card = { (float)x, (float)y, (float)w, (float)h };
+                                        bool hover = CheckCollisionPointRec(mouse, card);
+                                        // Card background match page background
+                                        DrawRoundedPanel(card, Theme::Background());
+
+                                        // Top border only (no full border) - gray color
+                                        Color topBorderColor = Color{200,200,200,255};
+                                        DrawRectangle((int)card.x, (int)card.y, (int)card.width, 4, topBorderColor);
+
+                                        // Poster on left as portrait with a bit of top margin
+                                        float posterMarginLeft = 10.0f;
+                                        float posterMarginTop = 12.0f;
+                                        float posterBottomMargin = 10.0f;
+                                        float posterW = 120.0f;
+                                        float posterH = (float)h - posterMarginTop - posterBottomMargin;
+
+                                        // Poster background (white)
+                                        DrawRectangle((int)(x + posterMarginLeft), (int)(y + posterMarginTop), (int)posterW, (int)posterH, WHITE);
+                                        DrawTexturePro(movies[i].poster, {0,0,(float)movies[i].poster.width,(float)movies[i].poster.height}, { (float)x + posterMarginLeft, (float)y + posterMarginTop, posterW, posterH }, {0,0}, 0, WHITE);
+
+                                        // Rating circle on poster (letter inside)
+                                        float ocx = (float)x + posterMarginLeft + posterW - 18.0f;
+                                        float ocy = (float)y + posterMarginTop + 18.0f;
+                                        DrawCircle((int)ocx, (int)ocy, 16, Theme::Button());
+                                        DrawCircleLines((int)ocx, (int)ocy, 16, Theme::Outline());
+                                        // Draw rating letter
+                                        DrawTextEx(appFont, movies[i].rating.c_str(), Vector2{ocx - 7.0f, ocy - 10.0f}, 20.0f, 1.0f, WHITE);
+
+                                        // Details on right
+                                        Vector2 titlePos = { (float)x + 160, (float)y + 10 };
+                                        Vector2 metaPos = { (float)x + 160, (float)y + 46 };
+                                        Vector2 showtimesStart = { (float)x + 160, (float)y + 78 };
+                                        Vector2 langPos = { (float)x + 160, (float)y + 118 };
+                                        Vector2 pricePos = { (float)x + 600, (float)y + 60 };
+
+                                        // Title (prominent)
+                                        DrawTextEx(appFont, movies[i].title.c_str(), titlePos, 26.0f, 1.0f, Theme::Primary());
+
+                                        // Small meta line: genre and duration (no icon)
+                                        Color metaColor = Theme::Text();
+                                        DrawTextEx(appFont, TextFormat("%s | %d min.", movies[i].genre.c_str(), movies[i].duration), metaPos, 18.0f, 1.0f, metaColor);
+
+                                        // Showtimes as orange rounded buttons (match movie tab)
+                                        Color showtimeColor = Color{236,125,26,255};
+                                        int btnW = 90; int btnH = 38; int btnGap = 12;
+                                        for (int s = 0; s < (int)movies[i].showTimes.size(); s++) {
+                                            float sx = showtimesStart.x + s * (btnW + btnGap);
+                                            float sy = showtimesStart.y;
+                                            Rectangle stRect = { sx, sy, (float)btnW, (float)btnH };
+                                            bool stHover = CheckCollisionPointRec(mouse, stRect);
+                                            DrawRoundedButton(stRect, movies[i].showTimes[s].c_str(), appFont, 18, stHover ? showtimeColor : showtimeColor, WHITE);
+
+                                            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, stRect)) {
+                                                // select this movie and time and go to booking
+                                                selectedMovie = i;
+                                                selectedTime = movies[i].showTimes[s];
+                                                currentShow = new Show(&movies[i]);
+                                                currentShow->InitSeats();
+                                                currentShow->LoadBookedSeats();
+                                                prevState = state;
+                                                state = BOOKING;
+                                            }
+                                        }
+
+                                        // Language or subtitle info
+                                        DrawTextEx(appFont, TextFormat("%s", movies[i].language.c_str()), langPos, 16.0f, 1.0f, Theme::SecondaryText());
+
+                                        // Price on the right
+                                        DrawTextEx(appFont, TextFormat("%d$", movies[i].price), pricePos, 24.0f, 1.0f, Theme::Primary());
+
+                                        // Card click fallback (clicking elsewhere opens booking)
+                                        if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                                            selectedMovie = i;
+                                            currentShow = new Show(&movies[i]);
+                                            currentShow->InitSeats();
+                                            currentShow->LoadBookedSeats();
+                                            prevState = state;
+                                            state = BOOKING;
+                                        }
+                                    }
+
+                                    EndScissorMode();
+
         }
 
         else if (state == ACCOUNT)
         {
-            // Greeting
+            // Greeting (moved down to avoid navbar overlap at y=70)
             std::string greet = "Hello " + loginUsername;
-            DrawText(greet.c_str(), 80, 30, 40, Theme::Primary());
+            DrawText(greet.c_str(), 80, 100, 40, Theme::Primary());
 
             // Recent bookings list below greeting (filtered by username)
             std::ifstream file("assets/bookings.txt");
 
-            int y = 100;
+            int y = 160;
 
             std::string line;
             std::string currentUsername;
@@ -575,18 +715,9 @@ int main() {
 
             file.close();
 
-            // Logout button (visible when logged in)
-            Rectangle logoutBtn = { 820, 20, 160, 40 };
-            bool logoutHover = CheckCollisionPointRec(mouse, logoutBtn);
-            if (loggedIn) {
-                DrawRectangleRec(logoutBtn, logoutHover ? Theme::ButtonHover() : Theme::Button());
-                DrawText("Logout", 860, 30, 18, Theme::ButtonText());
-            }
-
             Rectangle backBtn = { 400, 600, 200, 50 };
 
-            DrawRectangleRec(backBtn, GRAY);
-            DrawText("BACK", 470, 615, 20, WHITE);
+            DrawRoundedButton(backBtn, "BACK", appFont, 20, GRAY, WHITE);
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
@@ -594,32 +725,25 @@ int main() {
                 {
                     state = HOME;
                 }
-
-                if (loggedIn && CheckCollisionPointRec(GetMousePosition(), logoutBtn)) {
-                    loggedIn = false;
-                    currentRole = USER;
-                    loginUsername.clear();
-                    state = HOME;
-                }
             }
         }
 
         else if (state == CART)
         {
-            DrawText("Your Cart", 80, 30, 40, Theme::Primary());
+            // Title moved down to avoid navbar overlap
+            DrawText("Your Cart", 80, 100, 40, Theme::Primary());
 
-            int y = 100;
+            int y = 160;
 
             if (cart.empty()) {
-                DrawText("Cart is empty", 100, 100, 24, Theme::SecondaryText());
+                DrawText("Cart is empty", 100, 160, 24, Theme::SecondaryText());
             }
 
             for (int i = 0; i < (int)cart.size(); i++) {
                 Booking &b = cart[i];
 
                 Rectangle card = { 80, (float)y, 800, 100 };
-                DrawRectangleRec(card, Theme::Panel());
-                DrawRectangleLinesEx(card, 2, Theme::Outline());
+                DrawRoundedPanel(card, Theme::Panel());
 
                 DrawText(b.movieTitle.c_str(), 100, y + 10, 22, Theme::Primary());
                 DrawText(TextFormat("Seats: %d", (int)b.seatIds.size()), 100, y + 40, 18, Theme::Text());
@@ -628,11 +752,9 @@ int main() {
                 Rectangle buyBtn = { 650, (float)y + 10, 100, 30 };
                 Rectangle removeBtn = { 760, (float)y + 10, 100, 30 };
 
-                DrawRectangleRec(buyBtn, Theme::Primary());
-                DrawText("BUY", 690, y + 18, 18, Theme::ButtonText());
+                DrawRoundedButton(buyBtn, "BUY", appFont, 18, Theme::Primary(), Theme::ButtonText());
 
-                DrawRectangleRec(removeBtn, Theme::Button());
-                DrawText("REMOVE", 780, y + 18, 14, Theme::ButtonText());
+                DrawRoundedButton(removeBtn, "REMOVE", appFont, 14, Theme::Button(), Theme::ButtonText());
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mpos = GetMousePosition();
@@ -671,9 +793,8 @@ int main() {
                 y += 130;
             }
 
-            Rectangle backBtn = { 400, 600, 200, 50 };
-            DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 470, 615, 20, Theme::ButtonText());
+            Rectangle backBtn = { 400, 620, 200, 50 };
+            DrawRoundedButton(backBtn, "BACK", appFont, 20, Theme::Button(), Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 if (CheckCollisionPointRec(GetMousePosition(), backBtn)) {
@@ -693,18 +814,7 @@ int main() {
                 40
             };
 
-            DrawRectangleRec(
-                searchBar,
-                typingSearch ?
-                Theme::ButtonHover() :
-                Theme::Panel()
-            );
-
-            DrawRectangleLinesEx(
-                searchBar,
-                2,
-                Theme::Outline()
-            );
+            DrawRoundedPanel(searchBar, typingSearch ? Theme::ButtonHover() : Theme::Panel());
 
             DrawText(
                 searchText.empty() ? "Search movie..." : searchText.c_str(),
@@ -748,8 +858,7 @@ int main() {
 
             Rectangle backBtn = { 350, 600, 250, 60 };
 
-            DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 450, 620, 25, Theme::ButtonText());
+            DrawRoundedButton(backBtn, "BACK", appFont, 25, Theme::Button(), Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
@@ -808,8 +917,7 @@ int main() {
 
                 bool hover = CheckCollisionPointRec(mouse, card);
 
-                DrawRectangleRec(card, hover ? Theme::ButtonHover() : Theme::Button());
-                DrawRectangleLinesEx(card, 2, Theme::Outline());
+
 
                 DrawTexturePro(
                     movies[i].poster,
@@ -820,8 +928,8 @@ int main() {
                     WHITE
                 );
 
-                DrawText(movies[i].title.c_str(), x + 100, y + 10, 20, Theme::ButtonText());
-                DrawText(TextFormat("Price: %d$", movies[i].price), x + 100, y + 50, 20, Theme::ButtonText());
+                DrawTextEx(appFont, movies[i].title.c_str(), Vector2{ (float)(x + 100), (float)(y + 10) }, 20.0f, 1.0f, Theme::ButtonText());
+                DrawTextEx(appFont, TextFormat("Price: %d$", movies[i].price), Vector2{ (float)(x + 100), (float)(y + 50) }, 20.0f, 1.0f, Theme::ButtonText());
 
                 if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     selectedMovie = i;
@@ -830,6 +938,7 @@ int main() {
 
                     currentShow->LoadBookedSeats();
 
+                    prevState = state;
                     state = BOOKING;
                 }
             }
@@ -855,9 +964,7 @@ int main() {
 
                 bool hover = CheckCollisionPointRec(mouse, btn);
 
-                DrawRectangleRec(btn, hover ? Theme::ButtonHover() : Theme::Button());
-                DrawText(movies[selectedMovie].showTimes[i].c_str(),
-                    x + 20, y + 10, 18, Theme::ButtonText());
+                DrawRoundedButton(btn, movies[selectedMovie].showTimes[i].c_str(), appFont, 18, hover ? Theme::ButtonHover() : Theme::Button(), Theme::ButtonText());
 
                 if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                 {
@@ -873,11 +980,9 @@ int main() {
             Rectangle payBtn = { 20, topY, 200, 50 };
             Rectangle backBtn = { 240, topY, 200, 50 };
 
-            DrawRectangleRec(payBtn, Theme::Primary());
-            DrawText("ADD TO CART", 60, 280, 20, Theme::ButtonText());
+            DrawRoundedButton(payBtn, "ADD TO CART", appFont, 20, Theme::Primary(), Theme::ButtonText());
 
-            DrawRectangleRec(backBtn, Theme::Button());
-            DrawText("BACK", 300, 280, 20, Theme::ButtonText());
+            DrawRoundedButton(backBtn, "BACK", appFont, 20, Theme::Button(), Theme::ButtonText());
 
             if (currentShow != nullptr) {
                 currentShow->Update();
@@ -914,7 +1019,7 @@ int main() {
                     delete currentShow;
                     currentShow = nullptr;
 
-                    state = MAIN_MENU;
+                    state = HOME;
                 }
             }
 
@@ -956,164 +1061,72 @@ int main() {
 
             Rectangle backBtn = { 350,400,250,60 };
 
-            DrawRectangleRec(backBtn, Theme::Primary());
-            DrawText("BACK TO MENU", 390, 420, 20, Theme::ButtonText());
+            DrawRoundedButton(backBtn, "BACK TO MENU", appFont, 20, Theme::Primary(), Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
-                if (CheckCollisionPointRec(mouse, backBtn)) {
+                            if (CheckCollisionPointRec(mouse, backBtn)) {
 
-                    Booking booking;
+                                Booking booking;
 
-                    booking.bookingId = rand() % 10000;
-                    booking.movieTitle = movies[selectedMovie].title;
-                    booking.totalPrice = finalPrice;
+                                booking.bookingId = rand() % 10000;
+                                booking.movieTitle = movies[selectedMovie].title;
+                                booking.totalPrice = finalPrice;
 
-                    for (auto& s : currentShow->seats)
-                    {
-                        if (s.state == SELECTED)
-                        {
-                            booking.seatIds.push_back(s.id);
+                                for (auto& s : currentShow->seats)
+                                {
+                                    if (s.state == SELECTED)
+                                    {
+                                        booking.seatIds.push_back(s.id);
+                                    }
+                                }
+
+                                currentShow->ConfirmBooking();
+                                currentShow->SaveBookedSeats();
+
+                                delete currentShow;
+                                currentShow = nullptr;
+
+                                state = HOME;
+                            }
                         }
-                    }
-
-                    currentShow->ConfirmBooking();
-                    currentShow->SaveBookedSeats();
-
-                    delete currentShow;
-                    currentShow = nullptr;
-
-                    state = MAIN_MENU;
-                }
-            }
         }
         else if (state == ADMIN_PANEL)
         {
-            DrawText(
-                "ADMIN PANEL",
-                50,
-                20,
-                40,
-                Theme::Primary()
-            );
+            DrawTextEx(appFont, "ADMIN PANEL", Vector2{50.0f, 90.0f}, 40.0f, 1.0f, Theme::Primary());
 
-            Rectangle backBtn = { 50, 700, 200, 50 };
+            Rectangle adminBackBtn = { 750, 80, 120, 40 };
+            DrawRoundedButton(adminBackBtn, "BACK", appFont, 20, Theme::Button(), Theme::ButtonText());
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, adminBackBtn)) { state = HOME; }
 
-            DrawRectangleRec(backBtn, Theme::Button());
-
-            DrawText(
-                "BACK",
-                110,
-                715,
-                20,
-                Theme::ButtonText()
-            );
             adminScroll -= GetMouseWheelMove() * 30;
 
-            int y = 120 + adminScroll;
+            int y = 150 + (int)adminScroll;
 
             for (int i = 0; i < movies.size(); i++)
             {
-                DrawText(
-                    movies[i].title.c_str(),
-                    50,
-                    y,
-                    25,
-                    Theme::Text()
-                );
+                DrawTextEx(appFont, movies[i].title.c_str(), Vector2{50.0f, (float)y}, 25.0f, 1.0f, Theme::Text());
 
-                DrawText(
-                    TextFormat("Price: %d$", movies[i].price),
-                    250,
-                    y,
-                    25,
-                    Theme::Text()
-                );
+                DrawTextEx(appFont, TextFormat("Price: %d$", movies[i].price), Vector2{250.0f, (float)y}, 25.0f, 1.0f, Theme::Text());
 
-                Rectangle plusBtn =
-                {
-                    450,
-                    (float)y,
-                    40,
-                    40
-                };
+                Rectangle plusBtn = { 450, (float)y, 40, 40 };
+                Rectangle minusBtn = { 500, (float)y, 40, 40 };
+                Rectangle deleteBtn = { 560, (float)y, 120, 40 };
 
-                Rectangle minusBtn =
-                {
-                    500,
-                    (float)y,
-                    40,
-                    40
-                };
-
-                Rectangle deleteBtn =
-                {
-                    560,
-                    (float)y,
-                    120,
-                    40
-                };
-                Rectangle backBtn = { 750, 20, 180, 50 };
-
-                DrawRectangleRec(backBtn, Theme::Button());
-
-                DrawText(
-                    "BACK",
-                    800,
-                    25,
-                    25,
-                    Theme::ButtonText()
-                );
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                {
-                    if (CheckCollisionPointRec(mouse, backBtn))
-                    {
-                        state = HOME;
-                    }
-                }
-                DrawRectangleRec(plusBtn, GREEN);
-                DrawText("+", 465, y + 5, 25, WHITE);
-
-                DrawRectangleRec(minusBtn, ORANGE);
-                DrawText("-", 515, y + 5, 25, WHITE);
-
-                DrawRectangleRec(deleteBtn, RED);
-                DrawText("DELETE", 575, y + 10, 18, WHITE);
+                DrawRoundedButton(plusBtn, "+", appFont, 25, GREEN, WHITE);
+                DrawRoundedButton(minusBtn, "-", appFont, 25, ORANGE, WHITE);
+                DrawRoundedButton(deleteBtn, "DELETE", appFont, 18, RED, WHITE);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                 {
-                    if (CheckCollisionPointRec(mouse, plusBtn))
-                    {
-                        movies[i].price++;
-                    }
-
-                    if (CheckCollisionPointRec(mouse, minusBtn))
-                    {
-                        if (movies[i].price > 1)
-                            movies[i].price--;
-                    }
-
-                    if (CheckCollisionPointRec(mouse, deleteBtn))
-                    {
-                        UnloadTexture(movies[i].poster);
-
-                        movies.erase(movies.begin() + i);
-
-                        break;
-                    }
+                    if (CheckCollisionPointRec(mouse, plusBtn)) { movies[i].price++; }
+                    if (CheckCollisionPointRec(mouse, minusBtn)) { if (movies[i].price > 1) movies[i].price--; }
+                    if (CheckCollisionPointRec(mouse, deleteBtn)) { UnloadTexture(movies[i].poster); movies.erase(movies.begin() + i); break; }
                 }
 
                 y += 70;
             }
-
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            {
-                if (CheckCollisionPointRec(mouse, backBtn))
-                {
-                    state = HOME;
-                }
-            }
-            }
+        }
 
         // Theme toggle: press T to toggle theme
         if (IsKeyPressed(KEY_T)) Theme::Toggle();

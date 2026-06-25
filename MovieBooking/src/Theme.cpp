@@ -22,4 +22,6 @@ namespace Theme {
     Color SeatAvailable() { return (mode == DARK) ? Color{ 30, 80, 160, 255 } : DARKBLUE; }
     Color SeatSelected() { return (mode == DARK) ? Color{ 220, 180, 60, 255 } : YELLOW; }
     Color SeatBooked() { return (mode == DARK) ? Color{ 200, 70, 70, 255 } : RED; }
+
+    Color NavBar() { return (mode == DARK) ? Color{ 18, 24, 44, 255 } : Color{ 230, 240, 250, 255 }; }
 }

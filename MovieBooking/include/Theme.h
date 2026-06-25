@@ -24,4 +24,8 @@ namespace Theme {
 	Color SeatAvailable();
 	Color SeatSelected();
 	Color SeatBooked();
+
+	// Navbar color
+	Color NavBar();
 }
+

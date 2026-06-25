@@ -16,8 +16,12 @@ void Show::InitSeats() {
     int size = 40;
     int gap = 10;
 
+    // Create cinema with two aisles: skip columns 2 and 5
+    // Last row (row 4) has all columns
     for (int r = 0; r < 5; r++) {
         for (int c = 0; c < 8; c++) {
+            // Skip columns 2 and 5 for rows 0-3, but include for last row
+            if (r < 4 && (c == 2 || c == 5)) continue;
 
             Rectangle rect = {
                 startX + c * (size + gap),
@@ -48,6 +52,30 @@ void Show::Update() {
 }
 
 void Show::Draw() {
+    // Draw staircases/aisles in both middle sections (columns 2 and 5) for rows 0-3
+    int startX = 70;
+    int startY = 360;
+    int size = 40;
+    int gap = 10;
+    int aisle1_x = startX + 2 * (size + gap);
+    int aisle2_x = startX + 5 * (size + gap);
+
+    // Draw staircase steps for rows 0-3 in both aisles
+    for (int r = 0; r < 4; r++) {
+        int y = startY + r * (size + gap);
+
+        // Left aisle (column 2)
+        DrawRectangle(aisle1_x + 2, y + 5 + (r % 2) * 5, size - 4, 10, Color{150, 150, 150, 200});
+        DrawRectangle(aisle1_x + 5, y + 15 + (r % 2) * 5, size - 10, 8, Color{200, 200, 200, 200});
+        DrawRectangleLines(aisle1_x, y, size, size, Color{100, 100, 100, 100});
+
+        // Right aisle (column 5)
+        DrawRectangle(aisle2_x + 2, y + 5 + (r % 2) * 5, size - 4, 10, Color{150, 150, 150, 200});
+        DrawRectangle(aisle2_x + 5, y + 15 + (r % 2) * 5, size - 10, 8, Color{200, 200, 200, 200});
+        DrawRectangleLines(aisle2_x, y, size, size, Color{100, 100, 100, 100});
+    }
+
+    // Draw all seats
     for (auto& s : seats)
         s.Draw();
 }

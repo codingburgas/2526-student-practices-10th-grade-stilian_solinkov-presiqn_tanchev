@@ -70,3 +70,75 @@ Total Paid: $15
 ----------------------
 Avatar 2 (17:00):39
 Avatar 2:0,1,2,3,4,5,6,7,12,13,14,20,21,22,28,29,30,34
+Username: admin
+Booking ID: 41
+Movie: Avatar 2 (17:00)
+Seats: 17 
+Total Paid: $15
+----------------------
+Avatar 2 (17:00):17
+Avatar 2:0,1,2,3,4,5,6,7,12,13,14,20,21,22,28,29,30,34
+Username: Anonymous
+Booking ID: 8467
+Movie: Oppenheimer ()
+Seats: 10 
+Total Paid: $18
+----------------------
+Oppenheimer ():10
+Oppenheimer:
+Username: presko
+Booking ID: 41
+Movie: Avatar 2 (20:30)
+Seats: 18 
+Total Paid: $15
+----------------------
+Avatar 2 (20:30):18
+Avatar 2:0,1,2,3,4,5,6,7,12,13,14,20,21,22,28,29,30,34
+Username: presko
+Booking ID: 41
+Movie: Avatar 2 (17:00)
+Seats: 17 
+Total Paid: $15
+----------------------
+Avatar 2 (17:00):17
+Avatar 2:0,1,2,3,4,5,6,7,12,13,14,20,21,22,28,29,30,34
+Username: Anonymous
+Booking ID: 41
+Movie: Interstellar (14:00)
+Seats: 9 13 19 25 
+Total Paid: $48
+----------------------
+Interstellar (14:00):9,13,19,25
+Interstellar:
+Username: Anonymous
+Booking ID: 41
+Movie: Interstellar (18:00)
+Seats: 2 3 
+Total Paid: $24
+----------------------
+Interstellar (18:00):2,3
+Interstellar:
+Username: Anonymous
+Booking ID: 6334
+Movie: Oppenheimer (22:00)
+Seats: 11 13 
+Total Paid: $36
+----------------------
+Oppenheimer (22:00):11,13
+Oppenheimer:
+Username: Anonymous
+Booking ID: 6334
+Movie: Interstellar (18:00)
+Seats: 2 
+Total Paid: $12
+----------------------
+Interstellar (18:00):2
+Interstellar:
+Username: Anonymous
+Booking ID: 6500
+Movie: Interstellar (21:30)
+Seats: 2 
+Total Paid: $12
+----------------------
+Interstellar (21:30):2
+Interstellar:
