@@ -1,1 +1,14 @@
-﻿  MovieBooking.vcxproj -> C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe
+﻿  main.cpp
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(201,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(203,34): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(506,50): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(506,50): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(802,30): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(802,30): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(813,29): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(812,29): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(971,38): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(971,38): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(972,40): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\src\main.cpp(972,40): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  MovieBooking.vcxproj -> C:\Users\Veneta\Downloads\mnskdlnfk\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\x64\Debug\MovieBooking.exe

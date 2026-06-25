@@ -189,15 +189,6 @@ void InitMovies() {
 
     movies.push_back(Movie("Matrix", "EN", "Action", 13, 136, "A", "assets/images/matrix.png"));
     movies.back().showTimes = { "12:00", "16:00", "20:00" };
-
-    movies.push_back(Movie("Pulp Fiction", "EN", "Crime", 10, 154, "B", "assets/images/joker.png"));
-    movies.back().showTimes = { "15:00", "19:30" };
-
-    movies.push_back(Movie("The Shawshank Redemption", "EN", "Drama", 12, 142, "A", "assets/images/titanic.png"));
-    movies.back().showTimes = { "13:30", "18:30" };
-
-    movies.push_back(Movie("Parasite", "EN", "Thriller", 11, 132, "A", "assets/images/matrix.png"));
-    movies.back().showTimes = { "17:00", "20:30" };
 }
 
 // UI helper functions: rounded buttons and panels
@@ -513,9 +504,9 @@ int main() {
 
             // Search bar under navbar - use contrasting background so it's always visible
             Rectangle searchBar = { screenW - 20 - 300, 80, 300, 40 };
-            Color searchBg = (Theme::mode == Theme::DARK) ? Color{30, 60, 120, 255} : Theme::Panel();
+            Color searchBg = (Theme::mode == Theme::DARK) ? Color{ 70,130,180,255 } : Theme::Panel();
             DrawRoundedPanel(searchBar, typingSearch ? Theme::ButtonHover() : searchBg);
-            DrawTextEx(appFont, searchText.empty() ? "Search movie..." : searchText.c_str(), Vector2{ searchBar.x + 10.0f, searchBar.y + 8.0f }, 20.0f, 1.0f, WHITE);
+            DrawTextEx(appFont, searchText.empty() ? "Search movie..." : searchText.c_str(), Vector2{ searchBar.x + 10.0f, searchBar.y + 8.0f }, 20.0f, 1.0f, Theme::ButtonText());
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 typingSearch = CheckCollisionPointRec(GetMousePosition(), searchBar);
@@ -612,7 +603,7 @@ int main() {
                                         DrawTextEx(appFont, TextFormat("%s | %d min.", movies[i].genre.c_str(), movies[i].duration), metaPos, 18.0f, 1.0f, metaColor);
 
                                         // Showtimes as orange rounded buttons (match movie tab)
-                                        Color showtimeColor = Color{236,125,26,255};
+                                        Color showtimeColor = Color{70,130,180,255};
                                         int btnW = 90; int btnH = 38; int btnGap = 12;
                                         for (int s = 0; s < (int)movies[i].showTimes.size(); s++) {
                                             float sx = showtimesStart.x + s * (btnW + btnGap);

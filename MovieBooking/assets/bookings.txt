@@ -142,3 +142,11 @@ Total Paid: $12
 ----------------------
 Interstellar (21:30):2
 Interstellar:
+Username: Anonymous
+Booking ID: 6500
+Movie: Interstellar (18:00)
+Seats: 1 
+Total Paid: $12
+----------------------
+Interstellar (18:00):1
+Interstellar:
