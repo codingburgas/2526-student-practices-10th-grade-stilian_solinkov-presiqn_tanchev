@@ -1,0 +1,10 @@
+Avatar 2|EN|Action|15|192|B|assets/images/avatar.png|13:00,17:00,20:30
+Oppenheimer|EN|Drama|18|180|A|assets/images/oppenheimer.png|15:00,19:00,22:00
+The Dark Knight|EN|Action|13|152|A|assets/images/batman.png|16:00,19:00,22:30
+Inception|EN|Sci-Fi|14|148|A|assets/images/inception.png|12:30,15:30,20:00
+Joker|EN|Drama|11|122|B|assets/images/joker.png|13:00,18:00,21:00
+Titanic|EN|Romance|9|195|B|assets/images/titanic.png|11:00,14:00,17:00
+Dune|EN|Sci-Fi|16|155|B|assets/images/dune.png|14:15,19:15,22:15
+Matrix|EN|Action|13|136|A|assets/images/matrix.png|12:00,16:00,20:00
+Interstellar|EN|Sci-Fi|12|169|A|assets/images/interstellar.png|14:00,18:00,21:30
+parasite|EN|Custom|10|120|A|assets\images\par.jpeg|14:00

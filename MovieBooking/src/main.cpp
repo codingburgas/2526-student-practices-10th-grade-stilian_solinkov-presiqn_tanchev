@@ -4,7 +4,9 @@
 #include "../include/Theme.h"
 #include "../include/Booking.h"
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -63,9 +65,17 @@ int finalPrice = 0;
 float paymentTimer = 0;
 
 std::vector<Movie> movies;
+std::vector<Movie> deletedMovies;
 std::string searchText;
 bool typingSearch = false;
 float movieScroll = 0.0f;
+
+std::string adminMovieTitle;
+std::string adminMovieTimes;
+std::string adminMoviePrice;
+std::string adminMoviePoster;
+std::string adminMessage;
+int activeAdminField = 0;
 
 // Login UI state
 std::string loginUsername;
@@ -161,34 +171,97 @@ bool EmailExists(const std::string& email) {
     return false; // Email doesn't exist
 }
 
+std::vector<std::string> SplitText(const std::string& text, char delimiter) {
+    std::vector<std::string> result;
+    std::stringstream ss(text);
+    std::string item;
+
+    while (getline(ss, item, delimiter)) {
+        if (!item.empty() && item[0] == ' ') item.erase(0, 1);
+        if (!item.empty()) result.push_back(item);
+    }
+
+    return result;
+}
+
+std::string JoinText(const std::vector<std::string>& values, char delimiter) {
+    std::string result;
+
+    for (int i = 0; i < (int)values.size(); i++) {
+        if (i > 0) result += delimiter;
+        result += values[i];
+    }
+
+    return result;
+}
+
+void AddMovie(std::vector<Movie>& list, const std::string& title, const std::string& language, const std::string& genre, int price, int duration, const std::string& rating, const std::string& imagePath, const std::vector<std::string>& showTimes) {
+    list.emplace_back(title, language, genre, price, duration, rating, imagePath);
+    list.back().showTimes = showTimes;
+}
+
+void SaveMovieCatalog(const char* filePath, const std::vector<Movie>& list) {
+    std::ofstream file(filePath);
+
+    for (const auto& movie : list) {
+        file << movie.title << "|"
+             << movie.language << "|"
+             << movie.genre << "|"
+             << movie.price << "|"
+             << movie.duration << "|"
+             << movie.rating << "|"
+             << movie.imagePath << "|"
+             << JoinText(movie.showTimes, ',') << "\n";
+    }
+
+    file.close();
+}
+
+bool LoadMovieCatalog(const char* filePath, std::vector<Movie>& list) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) return false;
+
+    std::string line;
+    while (getline(file, line)) {
+        std::vector<std::string> parts = SplitText(line, '|');
+        if (parts.size() < 8) continue;
+
+        int price = std::atoi(parts[3].c_str());
+        int duration = std::atoi(parts[4].c_str());
+        std::vector<std::string> times = SplitText(parts[7], ',');
+
+        AddMovie(list, parts[0], parts[1], parts[2], price, duration, parts[5], parts[6], times);
+    }
+
+    file.close();
+    return true;
+}
+
+void SaveMovieData() {
+    SaveMovieCatalog("assets/movies.txt", movies);
+    SaveMovieCatalog("assets/deleted_movies.txt", deletedMovies);
+}
+
+void InitDefaultMovies() {
+    AddMovie(movies, "Interstellar", "EN", "Sci-Fi", 12, 169, "A", "assets/images/interstellar.png", { "14:00", "18:00", "21:30" });
+    AddMovie(movies, "Avatar 2", "EN", "Action", 15, 192, "B", "assets/images/avatar.png", { "13:00", "17:00", "20:30" });
+    AddMovie(movies, "Oppenheimer", "EN", "Drama", 18, 180, "A", "assets/images/oppenheimer.png", { "15:00", "19:00", "22:00" });
+    AddMovie(movies, "The Dark Knight", "EN", "Action", 13, 152, "A", "assets/images/batman.png", { "16:00", "19:00", "22:30" });
+    AddMovie(movies, "Inception", "EN", "Sci-Fi", 14, 148, "A", "assets/images/inception.png", { "12:30", "15:30", "20:00" });
+    AddMovie(movies, "Joker", "EN", "Drama", 11, 122, "B", "assets/images/joker.png", { "13:00", "18:00", "21:00" });
+    AddMovie(movies, "Titanic", "EN", "Romance", 9, 195, "B", "assets/images/titanic.png", { "11:00", "14:00", "17:00" });
+    AddMovie(movies, "Dune", "EN", "Sci-Fi", 16, 155, "B", "assets/images/dune.png", { "14:15", "19:15", "22:15" });
+    AddMovie(movies, "Matrix", "EN", "Action", 13, 136, "A", "assets/images/matrix.png", { "12:00", "16:00", "20:00" });
+}
+
 void InitMovies() {
+    bool loadedMovies = LoadMovieCatalog("assets/movies.txt", movies);
+    LoadMovieCatalog("assets/deleted_movies.txt", deletedMovies);
 
-    movies.push_back(Movie("Interstellar", "EN", "Sci-Fi", 12, 169, "A", "assets/images/interstellar.png"));
-    movies.back().showTimes = { "14:00", "18:00", "21:30" };
-
-    movies.push_back(Movie("Avatar 2", "EN", "Action", 15, 192, "B", "assets/images/avatar.png"));
-    movies.back().showTimes = { "13:00", "17:00", "20:30" };
-
-    movies.push_back(Movie("Oppenheimer", "EN", "Drama", 18, 180, "A", "assets/images/oppenheimer.png"));
-    movies.back().showTimes = { "15:00", "19:00", "22:00" };
-
-    movies.push_back(Movie("The Dark Knight", "EN", "Action", 13, 152, "A", "assets/images/batman.png"));
-    movies.back().showTimes = { "16:00", "19:00", "22:30" };
-
-    movies.push_back(Movie("Inception", "EN", "Sci-Fi", 14, 148, "A", "assets/images/inception.png"));
-    movies.back().showTimes = { "12:30", "15:30", "20:00" };
-
-    movies.push_back(Movie("Joker", "EN", "Drama", 11, 122, "B", "assets/images/joker.png"));
-    movies.back().showTimes = { "13:00", "18:00", "21:00" };
-
-    movies.push_back(Movie("Titanic", "EN", "Romance", 9, 195, "B", "assets/images/titanic.png"));
-    movies.back().showTimes = { "11:00", "14:00", "17:00" };
-
-    movies.push_back(Movie("Dune", "EN", "Sci-Fi", 16, 155, "B", "assets/images/dune.png"));
-    movies.back().showTimes = { "14:15", "19:15", "22:15" };
-
-    movies.push_back(Movie("Matrix", "EN", "Action", 13, 136, "A", "assets/images/matrix.png"));
-    movies.back().showTimes = { "12:00", "16:00", "20:00" };
+    if (!loadedMovies) {
+        InitDefaultMovies();
+        SaveMovieData();
+    }
 }
 
 // UI helper functions: rounded buttons and panels
@@ -205,6 +278,40 @@ static void DrawRoundedButton(Rectangle rect, const char* label, Font font, int 
 
 static void DrawRoundedPanel(Rectangle rect, Color bg) {
     DrawRectangleRounded(rect, 0.12f, 6, bg);
+}
+
+static void DrawAdminField(Rectangle rect, const char* label, const std::string& value, bool active, Font font) {
+    DrawTextEx(font, label, Vector2{ rect.x, rect.y - 22.0f }, 16.0f, 1.0f, Theme::Text());
+    DrawRoundedPanel(rect, active ? Theme::ButtonHover() : Theme::Panel());
+    DrawRectangleLinesEx(rect, 2, active ? Theme::Primary() : Theme::Outline());
+    DrawTextEx(font, value.empty() ? "-" : value.c_str(), Vector2{ rect.x + 10.0f, rect.y + 9.0f }, 18.0f, 1.0f, Theme::Text());
+}
+
+static void AppendAdminInput(std::string& value, int maxLength, bool allowPaste = false) {
+    if (allowPaste && (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
+        const char* pastedText = GetClipboardText();
+
+        if (pastedText != nullptr) {
+            while (*pastedText != '\0' && (int)value.size() < maxLength) {
+                if (*pastedText >= 32 && *pastedText <= 125) {
+                    value.push_back(*pastedText);
+                }
+                pastedText++;
+            }
+        }
+    }
+
+    int key = GetCharPressed();
+    while (key > 0) {
+        if (key >= 32 && key <= 125 && (int)value.size() < maxLength) {
+            value.push_back((char)key);
+        }
+        key = GetCharPressed();
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE) && !value.empty()) {
+        value.pop_back();
+    }
 }
 
 static const int DESIGN_WIDTH = 1000;
@@ -1134,19 +1241,85 @@ int main() {
             DrawRoundedButton(adminBackBtn, "BACK", appFont, 20, Theme::Button(), Theme::ButtonText());
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, adminBackBtn)) { state = HOME; }
 
-            adminScroll -= GetMouseWheelMove() * 30;
+            Rectangle recoverBtn = { 590, 80, 140, 40 };
+            DrawRoundedButton(recoverBtn, TextFormat("RECOVER (%d)", (int)deletedMovies.size()), appFont, 16, deletedMovies.empty() ? GRAY : Theme::Primary(), WHITE);
 
-            int y = 150 + (int)adminScroll;
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, recoverBtn) && !deletedMovies.empty()) {
+                movies.push_back(deletedMovies.back());
+                deletedMovies.pop_back();
+                SaveMovieData();
+                adminMessage = "Movie recovered";
+            }
+
+            DrawTextEx(appFont, "Create Movie", Vector2{50.0f, 150.0f}, 24.0f, 1.0f, Theme::Primary());
+
+            Rectangle titleField = { 50, 200, 220, 40 };
+            Rectangle timesField = { 290, 200, 220, 40 };
+            Rectangle priceField = { 530, 200, 90, 40 };
+            Rectangle posterField = { 640, 200, 270, 40 };
+            Rectangle createBtn = { 760, 255, 150, 40 };
+
+            DrawAdminField(titleField, "Name", adminMovieTitle, activeAdminField == 1, appFont);
+            DrawAdminField(timesField, "Hours: 14:00,18:00", adminMovieTimes, activeAdminField == 2, appFont);
+            DrawAdminField(priceField, "Price", adminMoviePrice, activeAdminField == 3, appFont);
+            DrawAdminField(posterField, "Poster path", adminMoviePoster, activeAdminField == 4, appFont);
+            DrawRoundedButton(createBtn, "CREATE", appFont, 18, Theme::Primary(), Theme::ButtonText());
+
+            if (!adminMessage.empty()) {
+                DrawTextEx(appFont, adminMessage.c_str(), Vector2{50.0f, 265.0f}, 18.0f, 1.0f, Theme::SecondaryText());
+            }
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (CheckCollisionPointRec(mouse, titleField)) activeAdminField = 1;
+                else if (CheckCollisionPointRec(mouse, timesField)) activeAdminField = 2;
+                else if (CheckCollisionPointRec(mouse, priceField)) activeAdminField = 3;
+                else if (CheckCollisionPointRec(mouse, posterField)) activeAdminField = 4;
+                else activeAdminField = 0;
+
+                if (CheckCollisionPointRec(mouse, createBtn)) {
+                    int price = std::atoi(adminMoviePrice.c_str());
+                    std::vector<std::string> times = SplitText(adminMovieTimes, ',');
+                    std::string posterPath = adminMoviePoster.empty() ? "assets/images/Interstellar.png" : adminMoviePoster;
+
+                    if (adminMovieTitle.empty()) {
+                        adminMessage = "Enter a movie name";
+                    } else if (times.empty()) {
+                        adminMessage = "Enter at least one hour";
+                    } else if (price <= 0) {
+                        adminMessage = "Enter a valid price";
+                    } else {
+                        AddMovie(movies, adminMovieTitle, "EN", "Custom", price, 120, "A", posterPath, times);
+                        SaveMovieData();
+                        adminMovieTitle.clear();
+                        adminMovieTimes.clear();
+                        adminMoviePrice.clear();
+                        adminMoviePoster.clear();
+                        activeAdminField = 0;
+                        adminMessage = "Movie created";
+                    }
+                }
+            }
+
+            if (activeAdminField == 1) AppendAdminInput(adminMovieTitle, 40);
+            if (activeAdminField == 2) AppendAdminInput(adminMovieTimes, 40);
+            if (activeAdminField == 3) AppendAdminInput(adminMoviePrice, 5);
+            if (activeAdminField == 4) AppendAdminInput(adminMoviePoster, 260, true);
+
+            adminScroll -= GetMouseWheelMove() * 30;
+            if (adminScroll > 0) adminScroll = 0;
+
+            int y = 340 + (int)adminScroll;
 
             for (int i = 0; i < movies.size(); i++)
             {
                 DrawTextEx(appFont, movies[i].title.c_str(), Vector2{50.0f, (float)y}, 25.0f, 1.0f, Theme::Text());
 
-                DrawTextEx(appFont, TextFormat("Price: %d$", movies[i].price), Vector2{250.0f, (float)y}, 25.0f, 1.0f, Theme::Text());
+                DrawTextEx(appFont, TextFormat("Price: %d$", movies[i].price), Vector2{330.0f, (float)y}, 25.0f, 1.0f, Theme::Text());
+                DrawTextEx(appFont, JoinText(movies[i].showTimes, ',').c_str(), Vector2{50.0f, (float)y + 28.0f}, 16.0f, 1.0f, Theme::SecondaryText());
 
-                Rectangle plusBtn = { 450, (float)y, 40, 40 };
-                Rectangle minusBtn = { 500, (float)y, 40, 40 };
-                Rectangle deleteBtn = { 560, (float)y, 120, 40 };
+                Rectangle plusBtn = { 530, (float)y, 40, 40 };
+                Rectangle minusBtn = { 580, (float)y, 40, 40 };
+                Rectangle deleteBtn = { 650, (float)y, 120, 40 };
 
                 DrawRoundedButton(plusBtn, "+", appFont, 25, GREEN, WHITE);
                 DrawRoundedButton(minusBtn, "-", appFont, 25, ORANGE, WHITE);
@@ -1154,9 +1327,25 @@ int main() {
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                 {
-                    if (CheckCollisionPointRec(mouse, plusBtn)) { movies[i].price++; }
-                    if (CheckCollisionPointRec(mouse, minusBtn)) { if (movies[i].price > 1) movies[i].price--; }
-                    if (CheckCollisionPointRec(mouse, deleteBtn)) { UnloadTexture(movies[i].poster); movies.erase(movies.begin() + i); break; }
+                    if (CheckCollisionPointRec(mouse, plusBtn)) {
+                        movies[i].price++;
+                        SaveMovieData();
+                        adminMessage = "Price saved";
+                    }
+                    if (CheckCollisionPointRec(mouse, minusBtn)) {
+                        if (movies[i].price > 1) {
+                            movies[i].price--;
+                            SaveMovieData();
+                            adminMessage = "Price saved";
+                        }
+                    }
+                    if (CheckCollisionPointRec(mouse, deleteBtn)) {
+                        deletedMovies.push_back(movies[i]);
+                        movies.erase(movies.begin() + i);
+                        SaveMovieData();
+                        adminMessage = "Movie deleted. Use recover to restore it.";
+                        break;
+                    }
                 }
 
                 y += 70;
@@ -1171,6 +1360,9 @@ int main() {
     }
 
     for (auto& m : movies)
+        UnloadTexture(m.poster);
+
+    for (auto& m : deletedMovies)
         UnloadTexture(m.poster);
 
     CloseWindow();

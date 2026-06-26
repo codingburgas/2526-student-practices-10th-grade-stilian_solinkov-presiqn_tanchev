@@ -1,0 +1,4 @@
+Pres|EN|Custom|12|120|A|assets/images/Interstellar.png|13:00
+Parasite|EN|Custom|15|120|A|C:\Users\Veneta\Downloads\jdjhrfd\2526-student-practices-10th-grade-stilian_solinkov-presiqn_tanchev\MovieBooking\assets\images\par|16:00
+Pres|EN|Custom|12|120|A|assets/images/Interstellar.png|18:00
+Parasite|EN|Custom|15|120|A|assets\images\par.jpeg|19:00,17:00
