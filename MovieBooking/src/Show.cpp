@@ -3,8 +3,17 @@
 #include <sstream>
 
 
+Show::Show() {
+    movie = nullptr;
+}
+
 Show::Show(Movie* m) {
     movie = m;
+}
+
+Show::Show(Movie* m, const std::string& time) {
+    movie = m;
+    showTime = time;
 }
 
 void Show::InitSeats() {
@@ -90,6 +99,11 @@ int Show::GetTotalPrice() {
     return total;
 }
 
+std::string Show::GetBookingKey() const {
+    if (movie == nullptr) return "";
+    return movie->title + "|" + showTime;
+}
+
 void Show::ConfirmBooking() {
     for (auto& s : seats)
         if (s.state == SELECTED)
@@ -99,7 +113,7 @@ void Show::ConfirmBooking() {
 void Show::SaveBookedSeats() {
     std::ofstream file("assets/bookings.txt", std::ios::app);
 
-    file << movie->title << ":";
+    file << GetBookingKey() << ":";
 
     bool first = true;
 
@@ -120,15 +134,16 @@ void Show::LoadBookedSeats() {
 
     std::ifstream file("assets/bookings.txt");
     std::string line;
+    std::string bookingKey = GetBookingKey();
 
     while (getline(file, line)) {
 
-        size_t sep = line.find(":");
+        size_t sep = line.rfind(":");
         if (sep == std::string::npos) continue;
 
-        std::string movieName = line.substr(0, sep);
+        std::string savedKey = line.substr(0, sep);
 
-        if (movieName != movie->title)
+        if (savedKey != bookingKey)
             continue;
 
         std::string seatData = line.substr(sep + 1);

@@ -182,3 +182,19 @@ Total Paid: $12
 ----------------------
 Interstellar (18:00):9
 Interstellar:9
+Username: presko
+Booking ID: 41
+Movie: Interstellar (18:00)
+Seats: 19 
+Total Paid: $12
+----------------------
+Interstellar (18:00):19
+Interstellar:9,19
+Username: Anonymous
+Booking ID: 41
+Movie: Interstellar (18:00)
+Seats: 7 
+Total Paid: $12
+----------------------
+Interstellar|18:00:7
+Interstellar|18:00:7

@@ -207,11 +207,36 @@ static void DrawRoundedPanel(Rectangle rect, Color bg) {
     DrawRectangleRounded(rect, 0.12f, 6, bg);
 }
 
+static const int DESIGN_WIDTH = 1000;
+static const int DESIGN_HEIGHT = 700;
+
+static float GetDesignScale() {
+    float scaleX = (float)GetScreenWidth() / (float)DESIGN_WIDTH;
+    float scaleY = (float)GetScreenHeight() / (float)DESIGN_HEIGHT;
+    return std::min(scaleX, scaleY);
+}
+
+static Vector2 GetDesignOffset(float scale) {
+    return {
+        ((float)GetScreenWidth() - (float)DESIGN_WIDTH * scale) / 2.0f,
+        ((float)GetScreenHeight() - (float)DESIGN_HEIGHT * scale) / 2.0f
+    };
+}
+
+static void BeginDesignScissor(Rectangle rect, Vector2 offset, float scale) {
+    BeginScissorMode(
+        (int)(offset.x + rect.x * scale),
+        (int)(offset.y + rect.y * scale),
+        (int)(rect.width * scale),
+        (int)(rect.height * scale)
+    );
+}
+
 
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(1000, 700, "SiCinema");
+    InitWindow(DESIGN_WIDTH, DESIGN_HEIGHT, "SiCinema");
     SetTargetFPS(60);
 
     // Load application font (fallback to default)
@@ -225,13 +250,24 @@ int main() {
 
     while (!WindowShouldClose()) {
 
+        float designScale = GetDesignScale();
+        Vector2 designOffset = GetDesignOffset(designScale);
+        SetMouseOffset((int)-designOffset.x, (int)-designOffset.y);
+        SetMouseScale(1.0f / designScale, 1.0f / designScale);
         Vector2 mouse = GetMousePosition();
 
         BeginDrawing();
         ClearBackground(Theme::Background());
 
+        Camera2D designCamera = { 0 };
+        designCamera.offset = designOffset;
+        designCamera.target = { 0.0f, 0.0f };
+        designCamera.rotation = 0.0f;
+        designCamera.zoom = designScale;
+        BeginMode2D(designCamera);
+
         // Global navbar on all pages except seat-booking (BOOKING)
-        int screenW = GetScreenWidth();
+        int screenW = DESIGN_WIDTH;
         if (state != BOOKING) {
             Rectangle navBar = { 0, 0, (float)screenW, 70 };
             DrawRoundedPanel(navBar, Theme::NavBar());
@@ -540,9 +576,9 @@ int main() {
 
                                     // Vertical scroll handling (only when mouse over list area)
                                     float totalHeight = (h + gap) * (float)visibleIndices.size();
-                                    float viewHeight = (float)(GetScreenHeight() - startY - 20);
+                                    float viewHeight = (float)(DESIGN_HEIGHT - startY - 20);
                                     if (totalHeight > viewHeight) {
-                                        if (mouse.y >= startY && mouse.y <= GetScreenHeight()) {
+                                        if (mouse.y >= startY && mouse.y <= DESIGN_HEIGHT) {
                                             float wheel = GetMouseWheelMove();
                                             movieScroll -= wheel * 30.0f;
                                         }
@@ -554,7 +590,7 @@ int main() {
                                     }
 
                                     // Clip drawing to content area so navbar/searchbar stay on top
-                                    BeginScissorMode(0, startY, GetScreenWidth(), GetScreenHeight() - startY);
+                                    BeginDesignScissor({ 0.0f, (float)startY, (float)DESIGN_WIDTH, (float)(DESIGN_HEIGHT - startY) }, designOffset, designScale);
 
                                     for (int idx = 0; idx < (int)visibleIndices.size(); idx++) {
                                         int i = visibleIndices[idx];
@@ -618,7 +654,7 @@ int main() {
                                                 // select this movie and time and go to booking
                                                 selectedMovie = i;
                                                 selectedTime = movies[i].showTimes[s];
-                                                currentShow = new Show(&movies[i]);
+                                                currentShow = new Show(&movies[i], selectedTime);
                                                 currentShow->InitSeats();
                                                 currentShow->LoadBookedSeats();
                                                 prevState = state;
@@ -635,7 +671,8 @@ int main() {
                                         // Card click fallback (clicking elsewhere opens booking)
                                         if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                                             selectedMovie = i;
-                                            currentShow = new Show(&movies[i]);
+                                            selectedTime = movies[i].showTimes.empty() ? "" : movies[i].showTimes[0];
+                                            currentShow = new Show(&movies[i], selectedTime);
                                             currentShow->InitSeats();
                                             currentShow->LoadBookedSeats();
                                             prevState = state;
@@ -761,7 +798,7 @@ int main() {
                         state = PAYMENT;
 
                         std::ofstream file("assets/bookings.txt", std::ios::app);
-                        file << b.movieTitle << ":";
+                        file << b.seatKey << ":";
 
                         for (int j = 0; j < (int)b.seatIds.size(); j++) {
                             if (j) file << ",";
@@ -798,7 +835,7 @@ int main() {
 
         else if (state == MAIN_MENU) {
 
-            int screenW = GetScreenWidth();
+            int screenW = DESIGN_WIDTH;
 
             Rectangle searchBar = {
                 screenW - 20 - 300,
@@ -926,7 +963,8 @@ int main() {
 
                 if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     selectedMovie = i;
-                    currentShow = new Show(&movies[i]);
+                    selectedTime = movies[i].showTimes.empty() ? "" : movies[i].showTimes[0];
+                    currentShow = new Show(&movies[i], selectedTime);
                     currentShow->InitSeats();
 
                     currentShow->LoadBookedSeats();
@@ -962,6 +1000,9 @@ int main() {
                 if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                 {
                     selectedTime = movies[selectedMovie].showTimes[i];
+                    currentShow->showTime = selectedTime;
+                    currentShow->InitSeats();
+                    currentShow->LoadBookedSeats();
                 }
 
                 x += 120;
@@ -989,6 +1030,7 @@ int main() {
                     Booking b;
                     b.bookingId = rand() % 10000;
                     b.movieTitle = movies[selectedMovie].title + " (" + selectedTime + ")";
+                    b.seatKey = currentShow->GetBookingKey();
                     b.totalPrice = currentShow->GetTotalPrice();
 
                     for (auto& s : currentShow->seats) {
@@ -1124,6 +1166,7 @@ int main() {
         // Theme toggle: press T to toggle theme
         if (IsKeyPressed(KEY_T)) Theme::Toggle();
 
+        EndMode2D();
         EndDrawing();
     }
 
